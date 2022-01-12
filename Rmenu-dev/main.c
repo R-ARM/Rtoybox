@@ -34,7 +34,7 @@ struct r_tk_tab
 	int id;
 	
 	char name[255];
-	SDL_Rect *rect;
+	SDL_Rect rect;
 	SDL_Texture *text;
 
 	struct r_tk_tab *next;
@@ -63,15 +63,21 @@ void r_tk_prev_tab(struct r_tk *tk)
 {
 };
 
-struct r_tk_tab new_tab(struct r_tk *tk)
+struct r_tk_tab new_tab(struct r_tk *tk, char *name)
 {
 	struct r_tk_tab *tmp;
 
 	tmp = malloc(sizeof(struct r_tk_tab));
+	
+	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
 	tmp->id = tk->tabTail->id + 1;
+	strcpy(tmp->name, name);
+
+
 	tk->tabTail->next = tmp;
 	tk->tabTail = tmp;
 
+	tk->curTab = tmp;
 }
 
 struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName)
@@ -80,7 +86,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 	tmp = malloc(sizeof(struct r_tk));
 	tmp->window = window;
-	tmp->renderer = renderer;
+	tmp->renderer = *renderer;
 	tmp->font = font;
 
 	struct r_tk_tab *initialTab;
@@ -88,6 +94,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->id = 0;
 	initialTab->next = initialTab;
 	strcpy(initialTab->name, initTabName);
+
+	get_text_and_rect(*renderer, "Test", *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
 
 	tmp->tabHead = initialTab;
 	tmp->tabTail = initialTab;
@@ -98,7 +106,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 int r_tk_draw(struct r_tk *tk)
 {
-	SDL_RenderCopy(*tk->renderer, tk->curTab->text, NULL, tk->curTab->rect);
+	SDL_RenderCopy(tk->renderer, tk->curTab->text, NULL, &tk->curTab->rect);
 }
 
 SDL_Renderer *renderer;
@@ -111,6 +119,7 @@ int main(void)
 
 	struct r_tk *toolkit;
 	toolkit = new_r_tk(&window, &renderer, &font, "Test");
+	new_tab(toolkit, "two");
 
 	SDL_Event event;
 	while (1)
