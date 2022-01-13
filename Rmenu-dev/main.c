@@ -29,6 +29,17 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 	rect->h = text_height;
 }
 
+struct r_tk_btn
+{
+	int id;
+	int walked;
+	char name[255];
+	SDL_Rect rect;
+	SDL_Texture *text*;
+
+	struct r_tk_btn *next;
+};
+
 struct r_tk_tab
 {
 	int id;
@@ -36,6 +47,9 @@ struct r_tk_tab
 	char name[255];
 	SDL_Rect rect;
 	SDL_Texture *text;
+
+	struct r_tk_btn *curBtn;
+	struct r_tk_btn *btnHead;
 
 	struct r_tk_tab *next;
 	struct r_tk_tab *prev;
@@ -86,6 +100,20 @@ void new_tab(struct r_tk *tk, char *name)
 	tk->tabHead->next = tk->tabTail;
 
 	tk->curTab = tmp;
+}
+
+void new_btn(struct r_tk *tk, char *name)
+{
+	struct r_tk_btn *tmp;
+
+	tmp = malloc(sizeof(struct r_tk_btn));
+
+	get_text_and_Rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
+	tmp->id = tk->curTab->btnHead->id + 1;
+	strcpy(tmp->name, name);
+
+	tmp->next = tk->curTab->btnHead;
+	tk->curTab->btnHead = tmp;
 }
 
 struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName)
