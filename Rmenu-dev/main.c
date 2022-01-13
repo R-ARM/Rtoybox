@@ -109,8 +109,6 @@ void new_tab(struct r_tk *tk, char *name)
 
 	tk->tabHead->prev = tk->tabTail;
 	tk->tabTail->next = tk->tabHead;
-
-	tk->curTab = tmp;
 }
 
 void new_btn(struct r_tk *tk, char *name, int x, int y)
