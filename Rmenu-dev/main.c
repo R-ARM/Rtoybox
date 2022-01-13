@@ -39,6 +39,9 @@ struct r_tk_btn
 
 	struct r_tk_btn *prev;
 	struct r_tk_btn *next;
+
+	void (*callback)(struct r_tk_btn*, struct r_tk_tab*);
+	int hasCallback;
 };
 
 struct r_tk_tab
@@ -140,6 +143,7 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 		tab->btnHead->prev = tmp;
 	}
 	tmp->prev = 0;
+	tmp->hasCallback = 1;
 
 	tab->btnHead = tmp;
 	tab->curBtn = tmp;
@@ -202,7 +206,7 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
 	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 
-
+	// draw buttons
 	if(tk->curTab->hasButtons == 1)
 	{
 		tmpBtn = tk->curTab->btnHead;
