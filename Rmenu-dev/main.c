@@ -37,6 +37,7 @@ struct r_tk_btn
 	SDL_Rect rect;
 	SDL_Texture *text;
 
+	struct r_tk_btn *prev;
 	struct r_tk_btn *next;
 };
 
@@ -84,8 +85,14 @@ void r_tk_prev_tab(struct r_tk *tk)
 
 void r_tk_next_btn(struct r_tk *tk)
 {
-	if(tk->curTab->curBtn->next)
+	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
 		tk->curTab->curBtn = tk->curTab->curBtn->next;
+}
+
+void r_tk_prev_btn(struct r_tk *tk)
+{
+	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
+		tk->curTab->curBtn = tk->curTab->curBtn->prev;
 }
 
 void new_tab(struct r_tk *tk, char *name)
@@ -111,7 +118,7 @@ void new_tab(struct r_tk *tk, char *name)
 	tk->tabTail->next = tk->tabHead;
 }
 
-void new_btn(struct r_tk *tk, char *name, int x, int y)
+void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 {
 	struct r_tk_btn *tmp;
 
@@ -123,14 +130,21 @@ void new_btn(struct r_tk *tk, char *name, int x, int y)
 	tmp->rect.x = x;
 	tmp->rect.y = y;
 
-	if(tk->curTab->hasButtons == 0)
+	if(tab->hasButtons == 0)
+	{
 		tmp->next = 0;
+	}
 	else
-		tmp->next = tk->curTab->btnHead->next;
-	tk->curTab->btnHead = tmp;
-	tk->curTab->curBtn = tmp;
+	{
+		tmp->next = tab->btnHead;
+		tab->btnHead->prev = tmp;
+	}
+	tmp->prev = 0;
 
-	tk->curTab->hasButtons = 1;
+	tab->btnHead = tmp;
+	tab->curBtn = tmp;
+
+	tab->hasButtons = 1;
 }
 
 struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName)
@@ -174,29 +188,7 @@ int r_tk_draw(struct r_tk *tk)
 		tmp->rect.x = i;
 		i += tmp->rect.w + 10; // TODO: screen size scale
 		if(tmp == tk->curTab)
-		{
 			SDL_SetTextureColorMod(tmp->text, 255, 0, 0);
-			if(tmp->hasButtons == 1)
-			{
-				tmpBtn = tmp->btnHead;
-				while(tmpBtn != 0)
-				{
-					// buttons
-					if(tmp->btnHead == NULL || tmpBtn == NULL)
-						break;
-
-					if(tmpBtn == tk->curTab->curBtn)
-						SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
-					else
-						SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
-
-					SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
-					if(tmpBtn->next == NULL)
-						break;
-					tmpBtn = tmpBtn->next;
-				}
-			}
-		}
 		else
 			SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
 		SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
@@ -209,6 +201,24 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
 	SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
 	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
+
+
+	if(tk->curTab->hasButtons == 1)
+	{
+		tmpBtn = tk->curTab->btnHead;
+		while(tmpBtn != 0)
+		{
+			if(tmpBtn == tk->curTab->curBtn)
+				SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
+			else
+				SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
+
+			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+			if(tmpBtn->next == NULL)
+				break;
+			tmpBtn = tmpBtn->next;
+		}
+	}
 }
 
 SDL_Renderer *renderer;
@@ -222,14 +232,17 @@ int main(void)
 	struct r_tk *toolkit;
 	toolkit = new_r_tk(&window, &renderer, &font, "Test");
 	new_tab(toolkit, "two");
-	new_btn(toolkit, "dupa", 20, 20);
-	new_btn(toolkit, "dupa 2", 20, 50);
-	new_btn(toolkit, "kurwaa", 20, 80);
-	new_btn(toolkit, "dupa", 20, 110);
+
+	new_btn(toolkit, toolkit->tabHead->next, "dupa", 20, 20);
+	new_btn(toolkit, toolkit->tabHead->next, "dupa 2", 20, 50);
+	new_btn(toolkit, toolkit->tabHead->next, "kurwaa", 20, 80);
+	new_btn(toolkit, toolkit->tabHead->next, "dupa", 20, 110);
+
 	new_tab(toolkit, "3");
-	new_btn(toolkit, "3 btn", 30, 30);
+	new_btn(toolkit, toolkit->tabHead->next, "3 btn", 30, 30);
+
 	new_tab(toolkit, "four");
-	new_btn(toolkit, "testinggg", 20, 30);
+	new_btn(toolkit, toolkit->tabHead->next, "testinggg", 20, 30);
 
 	SDL_Event event;
 	while (1)
@@ -255,6 +268,9 @@ int main(void)
 							r_tk_prev_tab(toolkit);
 							break;
 						case SDLK_DOWN:
+							r_tk_prev_btn(toolkit);
+							break;
+						case SDLK_UP:
 							r_tk_next_btn(toolkit);
 							break;
 					}
