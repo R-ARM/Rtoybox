@@ -1,4 +1,4 @@
-#include "../libragnarok.h""
+#include "../libragnarok.h"
 
 int clamp(signed int v, int min, int max)
 {
@@ -71,14 +71,15 @@ struct r_tk
 	struct r_tk_tab *tabTail;
 };
 
+// yes, those ARE internally reversed
 void r_tk_next_tab(struct r_tk *tk)
 {
-	tk->curTab = tk->curTab->next;
+	tk->curTab = tk->curTab->prev;
 }
 
 void r_tk_prev_tab(struct r_tk *tk)
 {
-	tk->curTab = tk->curTab->prev;
+	tk->curTab = tk->curTab->next;
 }
 
 void r_tk_next_btn(struct r_tk *tk)
@@ -97,17 +98,17 @@ void new_tab(struct r_tk *tk, char *name)
 	strcpy(tmp->name, name);
 
 
-	tmp->id = tk->tabTail->id + 1;
+	tmp->id = tk->tabHead->id + 1;
 	tmp->hasButtons = 0;
 
-	tmp->prev = tk->tabHead;
-	tmp->next = tk->tabTail;
+	tmp->prev = tk->tabTail;
+	tmp->next = tk->tabHead;
 
-	tk->tabTail->prev = tmp;
-	tk->tabTail = tmp;
+	tk->tabHead->prev = tmp;
+	tk->tabHead = tmp;
 
-	tk->tabTail->prev = tk->tabHead;
-	tk->tabHead->next = tk->tabTail;
+	tk->tabHead->prev = tk->tabTail;
+	tk->tabTail->next = tk->tabHead;
 
 	tk->curTab = tmp;
 }
@@ -169,7 +170,7 @@ int r_tk_draw(struct r_tk *tk)
 	struct r_tk_btn *tmpBtn;
 	int i = 0;
 
-	tmp = tk->tabHead;
+	tmp = tk->tabTail;
 	while(1)
 	{
 		tmp->rect.x = i;
@@ -201,10 +202,10 @@ int r_tk_draw(struct r_tk *tk)
 		else
 			SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
 		SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
-		if(tmp->next == tk->tabHead)
+		if(tmp->prev == tk->tabTail)
 			break;
 
-		tmp = tmp->next;
+		tmp = tmp->prev;
 	}
 	// line separating tabs and other widgets
 	SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
