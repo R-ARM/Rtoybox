@@ -38,6 +38,7 @@ struct r_tk_tab
 	SDL_Texture *text;
 
 	struct r_tk_tab *next;
+	struct r_tk_tab *prev;
 };
 
 struct r_tk
@@ -57,13 +58,18 @@ struct r_tk
 
 void r_tk_next_tab(struct r_tk *tk)
 {
+	printf("%d %d\n", tk->curTab->id, tk->curTab->next->id);
+	tk->curTab = tk->curTab->next;
 };
 
 void r_tk_prev_tab(struct r_tk *tk)
 {
+
+	printf("%d %d\n", tk->curTab->id, tk->curTab->prev->id);
+	tk->curTab = tk->curTab->prev;
 };
 
-struct r_tk_tab new_tab(struct r_tk *tk, char *name)
+void new_tab(struct r_tk *tk, char *name)
 {
 	struct r_tk_tab *tmp;
 
@@ -73,9 +79,14 @@ struct r_tk_tab new_tab(struct r_tk *tk, char *name)
 	tmp->id = tk->tabTail->id + 1;
 	strcpy(tmp->name, name);
 
+	tmp->prev = tk->tabHead;
+	tmp->next = tk->tabTail;
 
-	tk->tabTail->next = tmp;
+	tk->tabTail->prev = tmp;
 	tk->tabTail = tmp;
+
+	tk->tabTail->prev = tk->tabHead;
+	tk->tabHead->next = tk->tabTail;
 
 	tk->curTab = tmp;
 }
@@ -93,6 +104,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab = malloc(sizeof(struct r_tk_tab));
 	initialTab->id = 0;
 	initialTab->next = initialTab;
+	initialTab->prev = initialTab;
 	strcpy(initialTab->name, initTabName);
 
 	get_text_and_rect(*renderer, "Test", *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
@@ -106,7 +118,25 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 int r_tk_draw(struct r_tk *tk)
 {
-	SDL_RenderCopy(tk->renderer, tk->curTab->text, NULL, &tk->curTab->rect);
+	// draw tabs
+	struct r_tk_tab *tmp;
+	int i = 0;
+
+	tmp = tk->tabHead;
+	while(1)
+	{
+		tmp->rect.x = i;
+		i += tmp->rect.w + 10; // TODO: screen size scale
+		if(tmp == tk->curTab)
+			SDL_SetTextureColorMod(tmp->text, 255, 0, 0);
+		else
+			SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
+		SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
+		if(tmp->next == tk->tabHead)
+			break;
+
+		tmp = tmp->next;
+	}
 }
 
 SDL_Renderer *renderer;
@@ -120,6 +150,8 @@ int main(void)
 	struct r_tk *toolkit;
 	toolkit = new_r_tk(&window, &renderer, &font, "Test");
 	new_tab(toolkit, "two");
+	new_tab(toolkit, "3");
+	new_tab(toolkit, "four");
 
 	SDL_Event event;
 	while (1)
@@ -134,6 +166,16 @@ int main(void)
 			{
 				case SDL_QUIT:
 					exit(0);
+					break;
+				case SDL_KEYDOWN:
+					switch(event.key.keysym.sym)
+					{
+						case SDLK_RIGHT:
+							r_tk_next_tab(toolkit);
+							break;
+						case SDLK_LEFT:
+							r_tk_prev_tab(toolkit);
+					}
 					break;
 			}
 		}
