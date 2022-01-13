@@ -124,7 +124,10 @@ void new_btn(struct r_tk *tk, char *name, int x, int y)
 	tmp->rect.x = x;
 	tmp->rect.y = y;
 
-	tmp->next = tk->curTab->btnHead;
+	if(tk->curTab->hasButtons == 0)
+		tmp->next = 0;
+	else
+		tmp->next = tk->curTab->btnHead->next;
 	tk->curTab->btnHead = tmp;
 	tk->curTab->curBtn = tmp;
 
@@ -153,6 +156,9 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->tabTail = initialTab;
 	tmp->curTab = initialTab;
 
+	initialTab->btnHead = 0;
+	initialTab->curBtn = 0;
+
 	return tmp;
 }
 
@@ -174,7 +180,7 @@ int r_tk_draw(struct r_tk *tk)
 			if(tmp->hasButtons == 1)
 			{
 				tmpBtn = tmp->btnHead;
-				while(tmpBtn)
+				while(tmpBtn != 0)
 				{
 					// buttons
 					if(tmp->btnHead == NULL || tmpBtn == NULL)
