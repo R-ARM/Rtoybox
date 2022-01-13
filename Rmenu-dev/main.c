@@ -39,9 +39,6 @@ struct r_tk_btn
 
 	struct r_tk_btn *prev;
 	struct r_tk_btn *next;
-
-	void (*callback)(struct r_tk_btn*, struct r_tk_tab*);
-	int hasCallback;
 };
 
 struct r_tk_tab
