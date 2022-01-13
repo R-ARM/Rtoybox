@@ -58,14 +58,11 @@ struct r_tk
 
 void r_tk_next_tab(struct r_tk *tk)
 {
-	printf("%d %d\n", tk->curTab->id, tk->curTab->next->id);
 	tk->curTab = tk->curTab->next;
 };
 
 void r_tk_prev_tab(struct r_tk *tk)
 {
-
-	printf("%d %d\n", tk->curTab->id, tk->curTab->prev->id);
 	tk->curTab = tk->curTab->prev;
 };
 
@@ -137,6 +134,10 @@ int r_tk_draw(struct r_tk *tk)
 
 		tmp = tmp->next;
 	}
+	// line separating tabs and other widgets
+	SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
+	SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
+	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 }
 
 SDL_Renderer *renderer;
