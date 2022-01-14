@@ -87,14 +87,14 @@ void r_tk_prev_tab(struct r_tk *tk)
 
 void r_tk_next_btn(struct r_tk *tk)
 {
-	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
-			tk->curTab->curBtn = tk->curTab->curBtn->next;
+	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
+		tk->curTab->curBtn = tk->curTab->curBtn->prev;
 }
 
 void r_tk_prev_btn(struct r_tk *tk)
 {
-	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
-			tk->curTab->curBtn = tk->curTab->curBtn->prev;
+	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
+		tk->curTab->curBtn = tk->curTab->curBtn->next;
 }
 
 void new_tab(struct r_tk *tk, char *name)
@@ -133,19 +133,22 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tmp->rect.y = y;
 
 
-	tmp->next = tmp;
-	tmp->prev = tab->btnTail;
-	
-	if(tab->hasButtons == 0)
+	if(tab->btnHead == NULL || tab->hasButtons == 0)
 	{
+		tab->curBtn = tmp;
 		tab->btnHead = tmp;
+		tab->btnTail = tmp;
 	}
 	else
 	{
-		tab->btnTail->prev->next = tmp;
+		tmp->prev = tab->btnTail;
+		tab->btnTail->next = tmp;
 	}
 
 	tab->btnTail = tmp;
+
+	tab->btnHead->prev = 0;
+	tab->btnTail->next = 0;
 
 	tab->hasButtons = 1;
 }
@@ -223,6 +226,8 @@ int r_tk_draw(struct r_tk *tk)
 	{
 		if(tk->curTab->isList == 1)
 		{
+			int offsetY = 0;
+			offsetY	= tk->curTab->curBtn->rect.y;
 			tmpBtn = tk->curTab->btnHead;
 			while(tmpBtn != 0)
 			{
@@ -232,8 +237,9 @@ int r_tk_draw(struct r_tk *tk)
 					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
 				
 				tmpBtn->rect.x = 0;
-				tmpBtn->rect.y = 25 * i;
+				tmpBtn->rect.y = 25 * i - offsetY;
 				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+				tmpBtn->rect.y = 25 * i;
 				if(tmpBtn->next == NULL)
 					break;
 				tmpBtn = tmpBtn->next;
@@ -289,6 +295,7 @@ int main(void)
 
 	new_tab(toolkit, "3");
 	new_btn(toolkit, toolkit->tabHead->next, "3 btn", 30, 30);
+	new_btn(toolkit, toolkit->tabHead->next, "3 btn two", 50, 60);
 
 	new_tab(toolkit, "four");
 	new_btn(toolkit, toolkit->tabHead->next, "testinggg", 20, 30);
