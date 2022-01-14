@@ -49,10 +49,12 @@ struct r_tk_tab
 	SDL_Rect rect;
 	SDL_Texture *text;
 
+	int isList;
 	int hasButtons;
 	struct r_tk_btn *curBtn;
 	struct r_tk_btn *btnHead;
-
+	struct r_tk_btn *btnTail;
+	
 	struct r_tk_tab *next;
 	struct r_tk_tab *prev;
 };
@@ -86,13 +88,13 @@ void r_tk_prev_tab(struct r_tk *tk)
 void r_tk_next_btn(struct r_tk *tk)
 {
 	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
-		tk->curTab->curBtn = tk->curTab->curBtn->next;
+			tk->curTab->curBtn = tk->curTab->curBtn->next;
 }
 
 void r_tk_prev_btn(struct r_tk *tk)
 {
 	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
-		tk->curTab->curBtn = tk->curTab->curBtn->prev;
+			tk->curTab->curBtn = tk->curTab->curBtn->prev;
 }
 
 void new_tab(struct r_tk *tk, char *name)
@@ -130,20 +132,20 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tmp->rect.x = x;
 	tmp->rect.y = y;
 
+
+	tmp->next = tmp;
+	tmp->prev = tab->btnTail;
+	
 	if(tab->hasButtons == 0)
 	{
-		tmp->next = 0;
+		tab->btnHead = tmp;
 	}
 	else
 	{
-		tmp->next = tab->btnHead;
-		tab->btnHead->prev = tmp;
+		tab->btnTail->prev->next = tmp;
 	}
-	tmp->prev = 0;
-	tmp->hasCallback = 1;
 
-	tab->btnHead = tmp;
-	tab->curBtn = tmp;
+	tab->btnTail = tmp;
 
 	tab->hasButtons = 1;
 }
@@ -172,6 +174,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 	initialTab->btnHead = 0;
 	initialTab->curBtn = 0;
+	initialTab->btnTail = 0;
+	initialTab->hasButtons = 0;
 
 	return tmp;
 }
@@ -181,8 +185,11 @@ int r_tk_draw(struct r_tk *tk)
 	// draw tabs
 	struct r_tk_tab *tmp;
 	struct r_tk_btn *tmpBtn;
-	int i = 0;
 
+	SDL_Rect prevViewport;
+	SDL_RenderGetViewport(tk->renderer, &prevViewport);
+
+	int i = 0;
 	tmp = tk->tabTail;
 	while(1)
 	{
@@ -203,23 +210,54 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
 	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 
+	SDL_Rect area;
+	area.x = 0;
+	area.y = 25;
+	area.w = 480; // TODO: screen size scale
+	area.h = 320 - 25;
+
+	SDL_RenderSetViewport(tk->renderer, &area);
 	// draw buttons
+	i = 0;
 	if(tk->curTab->hasButtons == 1)
 	{
-		tmpBtn = tk->curTab->btnHead;
-		while(tmpBtn != 0)
+		if(tk->curTab->isList == 1)
 		{
-			if(tmpBtn == tk->curTab->curBtn)
-				SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
-			else
-				SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
+			tmpBtn = tk->curTab->btnHead;
+			while(tmpBtn != 0)
+			{
+				if(tmpBtn == tk->curTab->curBtn)
+					SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
+				else
+					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
+				
+				tmpBtn->rect.x = 0;
+				tmpBtn->rect.y = 25 * i;
+				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+				if(tmpBtn->next == NULL)
+					break;
+				tmpBtn = tmpBtn->next;
+				i++;
+			}
+		}
+		else
+		{
+			tmpBtn = tk->curTab->btnHead;
+			while(tmpBtn != 0)
+			{
+				if(tmpBtn == tk->curTab->curBtn)
+					SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
+				else
+					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
 
-			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
-			if(tmpBtn->next == NULL)
-				break;
-			tmpBtn = tmpBtn->next;
+				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+				if(tmpBtn->next == NULL)
+					break;
+				tmpBtn = tmpBtn->next;
+			}
 		}
 	}
+	SDL_RenderSetViewport(tk->renderer, &prevViewport);
 }
 
 SDL_Renderer *renderer;
@@ -234,10 +272,20 @@ int main(void)
 	toolkit = new_r_tk(&window, &renderer, &font, "Test");
 	new_tab(toolkit, "two");
 
-	new_btn(toolkit, toolkit->tabHead->next, "dupa", 20, 20);
-	new_btn(toolkit, toolkit->tabHead->next, "dupa 2", 20, 50);
-	new_btn(toolkit, toolkit->tabHead->next, "kurwaa", 20, 80);
-	new_btn(toolkit, toolkit->tabHead->next, "dupa", 20, 110);
+	new_btn(toolkit, toolkit->tabHead->next, "ss", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "dupa", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "tetwerg", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "qwertyoip", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "qr5y56p", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "asdjoeoip", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "placeholder", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "hokus pokus", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "twoja stara", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "to", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "twój stary", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "grwegwrg", 20, 0);
+	new_btn(toolkit, toolkit->tabHead->next, "ertertg", 20, 0);
+	toolkit->tabHead->next->isList = 1;
 
 	new_tab(toolkit, "3");
 	new_btn(toolkit, toolkit->tabHead->next, "3 btn", 30, 30);
