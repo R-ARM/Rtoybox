@@ -257,8 +257,6 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 	area.w = 480;
 	area.h = 320 - 25;
 
-	if(tab->hasButtons == 0) return;
-
 	tmpBtn = tab->btnHead;
 	while(tmpBtn != 0)
 	{
