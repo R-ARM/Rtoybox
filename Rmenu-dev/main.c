@@ -307,7 +307,7 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_RenderSetViewport(tk->renderer, &area);
 	// draw buttons
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
-		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/2;
+		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/3;
 
 	if(tk->curTab->hasButtons == 1)
 	{
@@ -320,7 +320,7 @@ int r_tk_draw(struct r_tk *tk)
 	if(tk->oldTab != NULL)
 	{
 		if(tk->oldTab->wantOffsetX != tk->oldTab->offsetX)
-			tk->oldTab->offsetX += (tk->oldTab->wantOffsetX - tk->oldTab->offsetX)/2;
+			tk->oldTab->offsetX += (tk->oldTab->wantOffsetX - tk->oldTab->offsetX)/3;
 		if(tk->oldTab->hasButtons == 1)
 			draw_tab(tk, tk->oldTab);
 		if(tk->oldTab->wantOffsetX - tk->oldTab->offsetX)
