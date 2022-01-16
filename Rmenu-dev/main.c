@@ -44,7 +44,10 @@ struct r_tk_btn
 struct r_tk_tab
 {
 	int id;
-	
+
+	int offsetY;
+	int wantOffsetY;
+
 	char name[255];
 	SDL_Rect rect;
 	SDL_Texture *text;
@@ -109,6 +112,8 @@ void new_tab(struct r_tk *tk, char *name)
 
 	tmp->id = tk->tabHead->id + 1;
 	tmp->hasButtons = 0;
+	tmp->offsetY = 0;
+	tmp->wantOffsetY = 0;
 
 	tmp->prev = tk->tabTail;
 	tmp->next = tk->tabHead;
@@ -266,8 +271,11 @@ int r_tk_draw(struct r_tk *tk)
 	{
 		if(tk->curTab->isList == 1)
 		{
-			int offsetY = 0;
-			offsetY	= tk->curTab->curBtn->rect.y - 25; // TODO
+			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO
+			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
+			{
+				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+			}
 			tmpBtn = tk->curTab->btnHead;
 			while(tmpBtn != 0)
 			{
@@ -277,7 +285,7 @@ int r_tk_draw(struct r_tk *tk)
 					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
 				
 				tmpBtn->rect.x = 0;
-				tmpBtn->rect.y = 25 * i - (offsetY > 0 ? offsetY : 0);
+				tmpBtn->rect.y = 25 * i - ((tk->curTab->offsetY) > 0 ? (tk->curTab->offsetY) : 0);
 				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
 				tmpBtn->rect.y = 25 * i;
 				if(tmpBtn->next == NULL)
