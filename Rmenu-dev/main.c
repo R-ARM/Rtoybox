@@ -50,6 +50,7 @@ struct r_tk_tab
 	int wantOffsetY;
 	int offsetX;
 	int wantOffsetX;
+	int scrolling;
 
 	char name[255];
 	SDL_Rect rect;
@@ -143,6 +144,7 @@ void new_tab(struct r_tk *tk, char *name)
 	tmp->wantOffsetY = 0;
 	tmp->offsetX = 0;
 	tmp->wantOffsetX = 0;
+	tmp->scrolling = 1;
 
 	tmp->prev = tk->tabTail;
 	tmp->next = tk->tabHead;
@@ -221,6 +223,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->offsetY = 0;
 	initialTab->wantOffsetX = 0;
 	initialTab->wantOffsetY = 0;
+	initialTab->scrolling = 1;
 	strcpy(initialTab->name, initTabName);
 
 	get_text_and_rect(*renderer, "Test", *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
@@ -324,9 +327,12 @@ int r_tk_draw(struct r_tk *tk)
 
 	if(tk->curTab->hasButtons == 1)
 	{
-		tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO: scale
-		if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
-			tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+		if(tk->curTab->scrolling == 1)
+		{
+			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO: scale
+			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
+				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+		}
 		draw_tab(tk, tk->curTab);
 	}
 	
@@ -355,8 +361,9 @@ int main(void)
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
 	new_btn(toolkit, toolkit->tabHead, "needs some", 30, 30);
 	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
-	/*new_tab(toolkit, "two");
+	toolkit->tabHead->scrolling = 0;
 
+	new_tab(toolkit, "two");
 	new_btn(toolkit, toolkit->tabHead, "ss", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "tetwerg", 20, 0);
@@ -377,13 +384,12 @@ int main(void)
 	toolkit->tabHead->isList = 1;
 
 	new_tab(toolkit, "four");
-
 	new_btn(toolkit, toolkit->tabHead, "testinggg", 20, 30);
 	new_btn(toolkit, toolkit->tabHead, "lower button 1", 20, 150);
 	new_btn(toolkit, toolkit->tabHead, "right.", 300, 230);
 	new_btn(toolkit, toolkit->tabHead, "lower button 2", 20, 200);
 	new_btn(toolkit, toolkit->tabHead, "offscreen", 20, 330);
-	toolkit->tabHead->isList = 0;*/
+	toolkit->tabHead->isList = 0;
 
 	SDL_Event event;
 	while (1)
