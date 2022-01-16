@@ -86,26 +86,32 @@ struct r_tk
 // yes, those ARE internally reversed
 void r_tk_next_tab(struct r_tk *tk)
 {
-	tk->curTab->offsetX = 0;
-	tk->curTab->wantOffsetX = -480; // TODO: screen scaling
+	if(tk->curTab != tk->curTab->prev)
+	{
+		tk->curTab->offsetX = 0;
+		tk->curTab->wantOffsetX = -480; // TODO: screen scaling
 	
-	tk->oldTab = tk->curTab;
-	tk->curTab = tk->curTab->prev;
+		tk->oldTab = tk->curTab;
+		tk->curTab = tk->curTab->prev;
 	
-	tk->curTab->offsetX = 480;
-	tk->curTab->wantOffsetX = 0;
+		tk->curTab->offsetX = 480;
+		tk->curTab->wantOffsetX = 0;
+	}
 }
 
 void r_tk_prev_tab(struct r_tk *tk)
 {
-	tk->curTab->offsetX = 0;
-	tk->curTab->wantOffsetX = 480;
+	if(tk->curTab != tk->curTab->next)
+	{
+		tk->curTab->offsetX = 0;
+		tk->curTab->wantOffsetX = 480;
 
-	tk->oldTab = tk->curTab;	
-	tk->curTab = tk->curTab->next;
+		tk->oldTab = tk->curTab;	
+		tk->curTab = tk->curTab->next;
 	
-	tk->curTab->offsetX = -480;
-	tk->curTab->wantOffsetX = 0;
+		tk->curTab->offsetX = -480;
+		tk->curTab->wantOffsetX = 0;
+	}
 }
 
 void r_tk_next_btn(struct r_tk *tk)
@@ -211,6 +217,10 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->id = 0;
 	initialTab->next = initialTab;
 	initialTab->prev = initialTab;
+	initialTab->offsetX = 0;
+	initialTab->offsetY = 0;
+	initialTab->wantOffsetX = 0;
+	initialTab->wantOffsetY = 0;
 	strcpy(initialTab->name, initTabName);
 
 	get_text_and_rect(*renderer, "Test", *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
@@ -279,32 +289,35 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
 
 	int i = 0;
-	tmp = tk->tabTail;
-	do
+	if(tk->tabTail != tk->tabHead)
 	{
-		tmp->rect.x = i;
-		i += tmp->rect.w + 10; // TODO: screen size scale
-		if(tmp == tk->curTab)
-			SDL_SetTextureColorMod(tmp->text, 255, 0, 0);
-		else
-			SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
-		SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
+		tmp = tk->tabTail;
+		do
+		{
+			tmp->rect.x = i;
+			i += tmp->rect.w + 10; // TODO: screen size scale
+			if(tmp == tk->curTab)
+				SDL_SetTextureColorMod(tmp->text, 255, 0, 0);
+			else
+				SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
+			SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
 
-		tmp = tmp->prev;
-	} while(tmp != tk->tabTail);
+			tmp = tmp->prev;
+		} while(tmp != tk->tabTail);
 
-	// line separating tabs and other widgets
-	SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
-	SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
-	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
+		// line separating tabs and other widgets
+		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
+		SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
+		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 
-	SDL_Rect area;
-	area.x = 0;
-	area.y = 25;
-	area.w = 480; // TODO: screen size scale
-	area.h = 320 - 25;
+		SDL_Rect area;
+		area.x = 0;
+		area.y = 25;
+		area.w = 480; // TODO: screen size scale
+		area.h = 320 - 25;
 
-	SDL_RenderSetViewport(tk->renderer, &area);
+		SDL_RenderSetViewport(tk->renderer, &area);
+	}
 	// draw buttons
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
 		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/3;
@@ -339,7 +352,10 @@ int main(void)
 
 	struct r_tk *toolkit;
 	toolkit = new_r_tk(&window, &renderer, &font, "Test");
-	new_tab(toolkit, "two");
+	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
+	new_btn(toolkit, toolkit->tabHead, "needs some", 30, 30);
+	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
+	/*new_tab(toolkit, "two");
 
 	new_btn(toolkit, toolkit->tabHead, "ss", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
@@ -367,7 +383,7 @@ int main(void)
 	new_btn(toolkit, toolkit->tabHead, "right.", 300, 230);
 	new_btn(toolkit, toolkit->tabHead, "lower button 2", 20, 200);
 	new_btn(toolkit, toolkit->tabHead, "offscreen", 20, 330);
-	toolkit->tabHead->isList = 0;
+	toolkit->tabHead->isList = 0;*/
 
 	SDL_Event event;
 	while (1)
