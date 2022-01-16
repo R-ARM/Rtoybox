@@ -233,15 +233,9 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
-	struct r_tk_btn *tmpBtn;
+	struct r_tk_btn *tmpBtn = tab->btnHead;
 	int i = 0;
-	SDL_Rect area;
-	area.x = 25;
-	area.y = 0;
-	area.w = 480;
-	area.h = 320 - 25;
 
-	tmpBtn = tab->btnHead;
 	while(tmpBtn != 0)
 	{
 		if(tmpBtn == tab->curBtn)
@@ -286,7 +280,7 @@ int r_tk_draw(struct r_tk *tk)
 
 	int i = 0;
 	tmp = tk->tabTail;
-	while(1)
+	do
 	{
 		tmp->rect.x = i;
 		i += tmp->rect.w + 10; // TODO: screen size scale
@@ -295,11 +289,10 @@ int r_tk_draw(struct r_tk *tk)
 		else
 			SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
 		SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
-		if(tmp->prev == tk->tabTail)
-			break;
 
 		tmp = tmp->prev;
-	}
+	} while(tmp != tk->tabTail);
+
 	// line separating tabs and other widgets
 	SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
 	SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
@@ -313,7 +306,6 @@ int r_tk_draw(struct r_tk *tk)
 
 	SDL_RenderSetViewport(tk->renderer, &area);
 	// draw buttons
-	i = 0;
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
 		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/2;
 
