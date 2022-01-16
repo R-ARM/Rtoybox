@@ -329,6 +329,11 @@ int r_tk_draw(struct r_tk *tk)
 		}
 		else
 		{
+			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 50; // TODO
+			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
+			{
+				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+			}
 			tmpBtn = tk->curTab->btnHead;
 			while(tmpBtn != 0)
 			{
@@ -336,8 +341,12 @@ int r_tk_draw(struct r_tk *tk)
 					SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
 				else
 					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
-
+				
+				tmpBtn->rect.x = 0 + tk->curTab->offsetX;
+				tmpBtn->rect.y -= tk->curTab->offsetY;
 				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+				tmpBtn->rect.y += tk->curTab->offsetY;
+				tmpBtn->rect.x = 0;
 				if(tmpBtn->next == NULL)
 					break;
 				tmpBtn = tmpBtn->next;
@@ -379,7 +388,12 @@ int main(void)
 	toolkit->tabHead->isList = 1;
 
 	new_tab(toolkit, "four");
+
 	new_btn(toolkit, toolkit->tabHead, "testinggg", 20, 30);
+	new_btn(toolkit, toolkit->tabHead, "lower button 1", 20, 150);
+	new_btn(toolkit, toolkit->tabHead, "right.", 300, 230);
+	new_btn(toolkit, toolkit->tabHead, "lower button 2", 20, 200);
+	new_btn(toolkit, toolkit->tabHead, "offscreen", 20, 330);
 	toolkit->tabHead->isList = 0;
 
 	SDL_Event event;
