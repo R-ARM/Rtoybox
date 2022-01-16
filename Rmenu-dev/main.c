@@ -153,6 +153,46 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tab->hasButtons = 1;
 }
 
+void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
+{
+	va_list valist;
+	va_start(valist, num);
+
+	struct r_tk_btn *tmp;
+	char *name;
+
+	for(int i = 0; i < num; i++)
+	{
+		name = va_arg(valist, char*);
+		tmp = malloc(sizeof(struct r_tk_btn));
+
+		get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
+
+		tmp->rect.x = 0;
+		tmp->rect.y = 0;
+
+		if(tab->btnHead == NULL || tab->hasButtons == 0)
+		{
+			tab->curBtn = tmp;
+			tab->btnHead = tmp;
+			tab->btnTail = tmp;
+		}
+		else
+		{
+			tmp->prev = tab->btnTail;
+			tab->btnTail->next = tmp;
+		}
+
+		tab->btnTail = tmp;
+		
+		tab->btnHead->prev = 0;
+		tab->btnTail->next = 0;
+
+		tab->hasButtons = 1;
+	}
+	va_end(valist);
+}
+
 struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName)
 {
 	struct r_tk *tmp;
@@ -278,27 +318,27 @@ int main(void)
 	toolkit = new_r_tk(&window, &renderer, &font, "Test");
 	new_tab(toolkit, "two");
 
-	new_btn(toolkit, toolkit->tabHead->next, "ss", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "dupa", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "tetwerg", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "qwertyoip", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "qr5y56p", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "asdjoeoip", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "placeholder", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "hokus pokus", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "twoja stara", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "to", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "twój stary", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "grwegwrg", 20, 0);
-	new_btn(toolkit, toolkit->tabHead->next, "ertertg", 20, 0);
-	toolkit->tabHead->next->isList = 1;
+	new_btn(toolkit, toolkit->tabHead, "ss", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "tetwerg", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "qwertyoip", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "qr5y56p", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "asdjoeoip", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "placeholder", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "hokus pokus", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "twoja stara", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "to", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "twój stary", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "grwegwrg", 20, 0);
+	new_btn(toolkit, toolkit->tabHead, "ertertg", 20, 0);
+	toolkit->tabHead->isList = 1;
 
 	new_tab(toolkit, "3");
-	new_btn(toolkit, toolkit->tabHead->next, "3 btn", 30, 30);
-	new_btn(toolkit, toolkit->tabHead->next, "3 btn two", 50, 60);
+	new_btn_list_batch(toolkit, toolkit->tabHead, 7, "3 btn", "buton", "i", "ran", "out", "of", "names");
+	toolkit->tabHead->isList = 1;
 
 	new_tab(toolkit, "four");
-	new_btn(toolkit, toolkit->tabHead->next, "testinggg", 20, 30);
+	new_btn(toolkit, toolkit->tabHead, "testinggg", 20, 30);
 
 	SDL_Event event;
 	while (1)
