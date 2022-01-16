@@ -1,4 +1,5 @@
 #include "../libragnarok.h"
+#include <tgmath.h>
 
 int clamp(signed int v, int min, int max)
 {
@@ -246,6 +247,55 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	return tmp;
 }
 
+void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
+{
+	struct r_tk_btn *tmpBtn;
+	int i = 0;
+	SDL_Rect area;
+	area.x = 25;
+	area.y = 0;
+	area.w = 480;
+	area.h = 320 - 25;
+
+	if(tab->hasButtons == 0) return;
+
+	tmpBtn = tab->btnHead;
+	while(tmpBtn != 0)
+	{
+		if(tmpBtn == tab->curBtn)
+			SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
+		else
+			SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
+		
+		if(tab->isList == 1)
+		{
+			tmpBtn->rect.x = 0 + tab->offsetX;
+			tmpBtn->rect.y = 25 * i - fmax(tab->offsetY, 0);
+		}
+		else
+		{
+			tmpBtn->rect.x += tab->offsetX;
+			tmpBtn->rect.y -= tab->offsetY;
+		}
+
+		SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+		
+		if(tab->isList == 1)
+		{
+			tmpBtn->rect.x = 0;
+			tmpBtn->rect.y = 25 * i;
+		}
+		else
+		{
+			tmpBtn->rect.x -= tab->offsetX;
+			tmpBtn->rect.y += tab->offsetY;
+		}
+
+		tmpBtn = tmpBtn->next;
+		i++;
+	}
+}
+
 int r_tk_draw(struct r_tk *tk)
 {
 	// draw tabs
@@ -298,60 +348,13 @@ int r_tk_draw(struct r_tk *tk)
 	}
 	else
 		zoomTab == NULL;
-	// TODO: move into separate function
+
 	if(tk->curTab->hasButtons == 1)
 	{
-		if(tk->curTab->isList == 1)
-		{
-			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO
-			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
-			{
-				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
-			}
-			tmpBtn = tk->curTab->btnHead;
-			while(tmpBtn != 0)
-			{
-				if(tmpBtn == tk->curTab->curBtn)
-					SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
-				else
-					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
-				
-				tmpBtn->rect.x = 0 + tk->curTab->offsetX;
-				tmpBtn->rect.y = 25 * i - ((tk->curTab->offsetY) > 0 ? (tk->curTab->offsetY) : 0);
-				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
-				tmpBtn->rect.y = 25 * i;
-				tmpBtn->rect.x = 0;
-				if(tmpBtn->next == NULL)
-					break;
-				tmpBtn = tmpBtn->next;
-				i++;
-			}
-		}
-		else
-		{
-			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 50; // TODO
-			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
-			{
-				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
-			}
-			tmpBtn = tk->curTab->btnHead;
-			while(tmpBtn != 0)
-			{
-				if(tmpBtn == tk->curTab->curBtn)
-					SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
-				else
-					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
-				
-				tmpBtn->rect.x += tk->curTab->offsetX;
-				tmpBtn->rect.y -= tk->curTab->offsetY;
-				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
-				tmpBtn->rect.y += tk->curTab->offsetY;
-				tmpBtn->rect.x -= tk->curTab->offsetX;
-				if(tmpBtn->next == NULL)
-					break;
-				tmpBtn = tmpBtn->next;
-			}
-		}
+		tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO: scale
+		if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
+			tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+		draw_tab(tk, tk->curTab);
 	}
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
 }
