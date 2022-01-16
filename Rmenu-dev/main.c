@@ -342,11 +342,11 @@ int r_tk_draw(struct r_tk *tk)
 				else
 					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
 				
-				tmpBtn->rect.x = 0 + tk->curTab->offsetX;
+				tmpBtn->rect.x += tk->curTab->offsetX;
 				tmpBtn->rect.y -= tk->curTab->offsetY;
 				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
 				tmpBtn->rect.y += tk->curTab->offsetY;
-				tmpBtn->rect.x = 0;
+				tmpBtn->rect.x -= tk->curTab->offsetX;
 				if(tmpBtn->next == NULL)
 					break;
 				tmpBtn = tmpBtn->next;
