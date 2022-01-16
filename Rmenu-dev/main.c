@@ -267,7 +267,7 @@ int r_tk_draw(struct r_tk *tk)
 		if(tk->curTab->isList == 1)
 		{
 			int offsetY = 0;
-			offsetY	= tk->curTab->curBtn->rect.y;
+			offsetY	= tk->curTab->curBtn->rect.y - 25; // TODO
 			tmpBtn = tk->curTab->btnHead;
 			while(tmpBtn != 0)
 			{
@@ -277,7 +277,7 @@ int r_tk_draw(struct r_tk *tk)
 					SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
 				
 				tmpBtn->rect.x = 0;
-				tmpBtn->rect.y = 25 * i - offsetY;
+				tmpBtn->rect.y = 25 * i - (offsetY > 0 ? offsetY : 0);
 				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
 				tmpBtn->rect.y = 25 * i;
 				if(tmpBtn->next == NULL)
