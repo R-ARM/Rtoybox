@@ -253,22 +253,19 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 		{
 			tmpBtn->rect.x = 0 + tab->offsetX;
 			tmpBtn->rect.y = 25 * i - fmax(tab->offsetY, 0);
-		}
-		else
-		{
-			tmpBtn->rect.x += tab->offsetX;
-			tmpBtn->rect.y -= tab->offsetY;
-		}
 
-		SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
-		
-		if(tab->isList == 1)
-		{
+			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+
 			tmpBtn->rect.x = 0;
 			tmpBtn->rect.y = 25 * i;
 		}
 		else
 		{
+			tmpBtn->rect.x += tab->offsetX;
+			tmpBtn->rect.y -= tab->offsetY;
+
+			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+
 			tmpBtn->rect.x -= tab->offsetX;
 			tmpBtn->rect.y += tab->offsetY;
 		}
