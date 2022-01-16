@@ -192,31 +192,7 @@ void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
 	for(int i = 0; i < num; i++)
 	{
 		name = va_arg(valist, char*);
-		tmp = malloc(sizeof(struct r_tk_btn));
-
-		get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
-
-		tmp->rect.x = 0;
-		tmp->rect.y = 0;
-
-		if(tab->btnHead == NULL || tab->hasButtons == 0)
-		{
-			tab->curBtn = tmp;
-			tab->btnHead = tmp;
-			tab->btnTail = tmp;
-		}
-		else
-		{
-			tmp->prev = tab->btnTail;
-			tab->btnTail->next = tmp;
-		}
-
-		tab->btnTail = tmp;
-		
-		tab->btnHead->prev = 0;
-		tab->btnTail->next = 0;
-
-		tab->hasButtons = 1;
+		new_btn(tk, tab, name, 0, 0);
 	}
 	va_end(valist);
 }
