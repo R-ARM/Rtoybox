@@ -76,6 +76,7 @@ struct r_tk
 	int previngTabs;
 	int nextingTabs;
 
+	struct r_tk_tab *oldTab;
 	struct r_tk_tab *curTab;
 
 	struct r_tk_tab *tabHead;
@@ -87,16 +88,22 @@ void r_tk_next_tab(struct r_tk *tk)
 {
 	tk->curTab->offsetX = 0;
 	tk->curTab->wantOffsetX = -480; // TODO: screen scaling
+	
+	tk->oldTab = tk->curTab;
 	tk->curTab = tk->curTab->prev;
+	
 	tk->curTab->offsetX = 480;
 	tk->curTab->wantOffsetX = 0;
 }
 
 void r_tk_prev_tab(struct r_tk *tk)
 {
-	tk->curTab->offsetX = -480;
-	tk->curTab->wantOffsetX = 0;
+	tk->curTab->offsetX = 0;
+	tk->curTab->wantOffsetX = 480;
+
+	tk->oldTab = tk->curTab;	
 	tk->curTab = tk->curTab->next;
+	
 	tk->curTab->offsetX = -480;
 	tk->curTab->wantOffsetX = 0;
 }
@@ -235,6 +242,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->tabHead = initialTab;
 	tmp->tabTail = initialTab;
 	tmp->curTab = initialTab;
+	tmp->oldTab = NULL;
 
 	tmp->previngTabs = 0;
 	tmp->nextingTabs = 0;
@@ -331,21 +339,10 @@ int r_tk_draw(struct r_tk *tk)
 	area.h = 320 - 25;
 
 	SDL_RenderSetViewport(tk->renderer, &area);
-	struct r_tk_tab *zoomTab;
 	// draw buttons
 	i = 0;
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
-		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/3;
-	if(tk->previngTabs || tk->nextingTabs)
-	{
-		if(tk->previngTabs)
-			zoomTab = tk->curTab->prev;
-		if(tk->nextingTabs)
-			zoomTab = tk->curTab->next;
-		zoomTab->offsetX += (zoomTab->wantOffsetX - zoomTab->offsetX)/3;
-	}
-	else
-		zoomTab == NULL;
+		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/2;
 
 	if(tk->curTab->hasButtons == 1)
 	{
@@ -353,6 +350,16 @@ int r_tk_draw(struct r_tk *tk)
 		if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
 			tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
 		draw_tab(tk, tk->curTab);
+	}
+	
+	if(tk->oldTab != NULL)
+	{
+		if(tk->oldTab->wantOffsetX != tk->oldTab->offsetX)
+			tk->oldTab->offsetX += (tk->oldTab->wantOffsetX - tk->oldTab->offsetX)/2;
+		if(tk->oldTab->hasButtons == 1)
+			draw_tab(tk, tk->oldTab);
+		if(tk->oldTab->wantOffsetX - tk->oldTab->offsetX)
+			tk->oldTab = NULL;
 	}
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
 }
