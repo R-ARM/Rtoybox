@@ -51,6 +51,9 @@ struct r_tk_tab
 	struct r_tk_btn *btnHead;
 	struct r_tk_btn *btnTail;
 	
+	struct r_tk_tab *coTab;
+	int coTabAct;
+
 	struct r_tk_tab *next;
 	struct r_tk_tab *prev;
 };
@@ -104,27 +107,48 @@ void r_tk_prev_tab(struct r_tk *tk)
 	}
 }
 
+void r_tk_toggle_cotab(struct r_tk *tk)
+{
+	if(tk->curTab->coTab != 0)
+		tk->curTab->coTabAct = !tk->curTab->coTabAct;
+}
+
 void r_tk_next_btn(struct r_tk *tk)
 {
-	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
-		tk->curTab->curBtn = tk->curTab->curBtn->prev;
+	if(tk->curTab->coTabAct == 1)
+	{
+		if(tk->curTab->coTab->hasButtons == 1 && tk->curTab->coTab->curBtn->prev)
+			tk->curTab->coTab->curBtn = tk->curTab->coTab->curBtn->prev;
+	}
+	else
+	{
+		if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
+			tk->curTab->curBtn = tk->curTab->curBtn->prev;
+	}
 }
 
 void r_tk_prev_btn(struct r_tk *tk)
 {
-	if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
-		tk->curTab->curBtn = tk->curTab->curBtn->next;
+	if(tk->curTab->coTabAct == 1)
+	{
+		if(tk->curTab->coTab->hasButtons == 1 && tk->curTab->coTab->curBtn->next)
+			tk->curTab->coTab->curBtn = tk->curTab->coTab->curBtn->next;
+	}
+	else
+	{
+		if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
+			tk->curTab->curBtn = tk->curTab->curBtn->next;
+	}
 }
 
-void new_tab(struct r_tk *tk, char *name)
+struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 {
 	struct r_tk_tab *tmp;
 
 	tmp = malloc(sizeof(struct r_tk_tab));
-	
+
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
 	strcpy(tmp->name, name);
-
 
 	tmp->id = tk->tabHead->id + 1;
 	tmp->hasButtons = 0;
@@ -135,14 +159,31 @@ void new_tab(struct r_tk *tk, char *name)
 	tmp->wantOffsetX = 0;
 	tmp->scrolling = 1;
 
+	return tmp;
+}
+
+void new_tab(struct r_tk *tk, char *name)
+{
+	struct r_tk_tab *tmp;
+	tmp = _new_tab(tk, name);
 	tmp->prev = tk->tabTail;
 	tmp->next = tk->tabHead;
+	tmp->coTab = 0;
+	tmp->coTabAct = 0;
 
 	tk->tabHead->prev = tmp;
 	tk->tabHead = tmp;
 
 	tk->tabHead->prev = tk->tabTail;
 	tk->tabTail->next = tk->tabHead;
+}
+
+struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *other, int offset)
+{
+	other->coTab = _new_tab(tk, other->name);
+
+	other->coTab->offsetX = offset;
+	other->coTab->coTab = other;
 }
 
 void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
@@ -156,7 +197,6 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 
 	tmp->rect.x = x;
 	tmp->rect.y = y;
-
 
 	if(tab->btnHead == NULL || tab->hasButtons == 0)
 	{
@@ -233,7 +273,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	return tmp;
 }
 
-void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
+void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
 	struct r_tk_btn *tmpBtn = tab->btnHead;
 	int i = 0;
@@ -241,7 +281,10 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 	while(tmpBtn != 0)
 	{
 		if(tmpBtn == tab->curBtn)
-			SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
+			if (tk->curTab->coTabAct == (tab == tk->curTab->coTab))
+				SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
+			else
+				SDL_SetTextureColorMod(tmpBtn->text, 120, 0, 0);
 		else
 			SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
 		
@@ -268,6 +311,17 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 
 		tmpBtn = tmpBtn->next;
 		i++;
+	}
+}
+
+void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
+{
+	_draw_tab(tk, tab);
+
+	if(tab->coTab != 0)
+	{
+		tab->coTab->offsetX = tab->offsetX + 300;
+		_draw_tab(tk, tab->coTab);
 	}
 }
 
