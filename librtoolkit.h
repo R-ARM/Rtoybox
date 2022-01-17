@@ -322,6 +322,7 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 	{
 		tab->coTab->offsetX = tab->offsetX + 300;
 		_draw_tab(tk, tab->coTab);
+		tab->coTab->offsetX = tab->offsetX;
 	}
 }
 
@@ -377,6 +378,12 @@ int r_tk_draw(struct r_tk *tk, int width)
 			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO: scale
 			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
 				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+		}
+		if(tk->curTab->coTab && tk->curTab->coTab->scrolling == 1)
+		{
+			tk->curTab->coTab->wantOffsetY = tk->curTab->coTab->curBtn->rect.y - 25;
+			if(tk->curTab->coTab->wantOffsetY != tk->curTab->coTab->offsetY)
+				tk->curTab->coTab->offsetY += (tk->curTab->coTab->wantOffsetY - tk->curTab->coTab->offsetY)/2;
 		}
 		draw_tab(tk, tk->curTab);
 	}

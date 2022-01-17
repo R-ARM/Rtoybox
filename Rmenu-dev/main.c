@@ -17,6 +17,10 @@ int main(void)
 	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
 	toolkit->tabHead->scrolling = 0;
 
+	new_cotab(toolkit, toolkit->tabHead, 300);
+	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, "this", "is", "a", "test");
+	toolkit->tabHead->coTab->isList = 1;
+
 	new_tab(toolkit, "two");
 	new_btn(toolkit, toolkit->tabHead, "ss", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
@@ -49,7 +53,7 @@ int main(void)
 	while (1)
 	{
 		SDL_RenderClear(renderer);
-		r_tk_draw(toolkit);
+		r_tk_draw(toolkit, 480);
 		SDL_RenderPresent(renderer);
 
 		while(SDL_PollEvent(&event) == 1)
@@ -62,16 +66,20 @@ int main(void)
 				case SDL_KEYDOWN:
 					switch(event.key.keysym.sym)
 					{
-					case SDLK_RIGHT:
+					case SDLK_w:
 						r_tk_next_tab(toolkit);
 						break;
-					case SDLK_LEFT:
+					case SDLK_q:
 						r_tk_prev_tab(toolkit);
 						break;
-					case SDLK_DOWN:
+					case SDLK_a:
+					case SDLK_s:
+						r_tk_toggle_cotab(toolkit);
+						break;
+					case SDLK_z:
 						r_tk_prev_btn(toolkit);
 						break;
-					case SDLK_UP:
+					case SDLK_x:
 						r_tk_next_btn(toolkit);
 						break;
 					}
