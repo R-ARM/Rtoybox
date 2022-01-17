@@ -8,10 +8,16 @@ TTF_Font *font;
 
 struct r_tk *toolkit;
 
+void buttonStateCallback(struct r_tk_btn *btn)
+{
+	printf("button %s state %d\n", btn->name, btn->state);
+}
+
 int main(void)
 {
 	r_init(&renderer, &window, &font, 0xff);
-	toolkit = new_r_tk(&window, &renderer, &font, "Test");
+	toolkit = new_r_tk(&window, &renderer, &font, "Test", buttonStateCallback);
+
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
 	new_btn(toolkit, toolkit->tabHead, "needs some", 30, 30);
 	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
@@ -20,6 +26,7 @@ int main(void)
 	new_cotab(toolkit, toolkit->tabHead, 300);
 	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, "this", "is", "a", "test");
 	toolkit->tabHead->coTab->isList = 1;
+	toolkit->tabHead->coTab->scrolling = 1;
 
 	new_tab(toolkit, "two");
 	new_btn(toolkit, toolkit->tabHead, "ss", 20, 0);
@@ -81,6 +88,9 @@ int main(void)
 						break;
 					case SDLK_x:
 						r_tk_next_btn(toolkit);
+						break;
+					case SDLK_e:
+						r_tk_action(toolkit);
 						break;
 					}
 			}

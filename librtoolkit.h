@@ -22,10 +22,12 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 struct r_tk_btn
 {
 	int id;
-	int walked;
+	int state;
 	char name[255];
 	SDL_Rect rect;
 	SDL_Texture *text;
+
+	void *ptr;
 
 	struct r_tk_btn *prev;
 	struct r_tk_btn *next;
@@ -63,6 +65,8 @@ struct r_tk
 	SDL_Window **window;
 	SDL_Renderer **renderer;
 	TTF_Font **font;
+
+	void (*btn_cb)(struct r_tk_btn*);
 
 	int winX;
 	int winY;
@@ -197,6 +201,7 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 
 	tmp->rect.x = x;
 	tmp->rect.y = y;
+	tmp->state = 0;
 
 	if(tab->btnHead == NULL || tab->hasButtons == 0)
 	{
@@ -234,7 +239,7 @@ void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
 	va_end(valist);
 }
 
-struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName)
+struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName, void (*cb)(struct r_tk_btn *btn))
 {
 	struct r_tk *tmp;
 
@@ -242,6 +247,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->window = window;
 	tmp->renderer = *renderer;
 	tmp->font = font;
+	tmp->btn_cb = cb;
 
 	struct r_tk_tab *initialTab;
 	initialTab = malloc(sizeof(struct r_tk_tab));
@@ -324,6 +330,14 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 		_draw_tab(tk, tab->coTab);
 		tab->coTab->offsetX = tab->offsetX;
 	}
+}
+
+void r_tk_action(struct r_tk *tk)
+{
+	if(tk->curTab->coTab != 0 && tk->curTab->coTabAct == 1)
+		tk->btn_cb(tk->curTab->coTab->curBtn);
+	else
+		tk->btn_cb(tk->curTab->curBtn);
 }
 
 int r_tk_draw(struct r_tk *tk, int width)
