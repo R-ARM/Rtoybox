@@ -4,6 +4,7 @@
 #include <linux/input.h>
 #include <fcntl.h>
 #include "../libragnarok.h"
+#include "../librtoolkit.h"
 
 SDL_Event poke;
 unsigned int poked;

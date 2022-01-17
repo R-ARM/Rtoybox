@@ -19,7 +19,7 @@ int main(void)
 	toolkit = new_r_tk(&window, &renderer, &font, "Test", buttonStateCallback);
 
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
-	new_btn(toolkit, toolkit->tabHead, "needs some", 30, 30);
+	new_btn(toolkit, toolkit->tabHead, "needs some", 3, 30);
 	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
 	toolkit->tabHead->scrolling = 0;
 
@@ -29,7 +29,7 @@ int main(void)
 	toolkit->tabHead->coTab->scrolling = 1;
 
 	new_tab(toolkit, "two");
-	new_btn(toolkit, toolkit->tabHead, "ss", 20, 0);
+	printf("%d\n", new_btn(toolkit, toolkit->tabHead, "ss", 20, 0));
 	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "tetwerg", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "qwertyoip", 20, 0);

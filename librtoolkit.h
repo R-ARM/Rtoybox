@@ -27,8 +27,6 @@ struct r_tk_btn
 	SDL_Rect rect;
 	SDL_Texture *text;
 
-	void *ptr;
-
 	struct r_tk_btn *prev;
 	struct r_tk_btn *next;
 };
@@ -72,6 +70,7 @@ struct r_tk
 	int winY;
 	int previngTabs;
 	int nextingTabs;
+	int lastBtnId;
 
 	struct r_tk_tab *oldTab;
 	struct r_tk_tab *curTab;
@@ -190,7 +189,7 @@ struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *other, int offset)
 	other->coTab->coTab = other;
 }
 
-void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
+int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 {
 	struct r_tk_btn *tmp;
 
@@ -199,6 +198,7 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
 	strcpy(tmp->name, name);
 
+	tmp->id = tk->lastBtnId++;
 	tmp->rect.x = x;
 	tmp->rect.y = y;
 	tmp->state = 0;
@@ -221,6 +221,8 @@ void new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tab->btnTail->next = 0;
 
 	tab->hasButtons = 1;
+
+	return tmp->id;
 }
 
 void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
@@ -248,6 +250,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->renderer = *renderer;
 	tmp->font = font;
 	tmp->btn_cb = cb;
+	tmp->lastBtnId = 0;
 
 	struct r_tk_tab *initialTab;
 	initialTab = malloc(sizeof(struct r_tk_tab));
