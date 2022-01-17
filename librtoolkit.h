@@ -271,7 +271,7 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 	}
 }
 
-int r_tk_draw(struct r_tk *tk)
+int r_tk_draw(struct r_tk *tk, int width)
 {
 	// draw tabs
 	struct r_tk_tab *tmp;
@@ -305,14 +305,16 @@ int r_tk_draw(struct r_tk *tk)
 		SDL_Rect area;
 		area.x = 0;
 		area.y = 25;
-		area.w = 480; // TODO: screen size scale
+		area.w = width; // TODO: screen size scale
 		area.h = 320 - 25;
 
 		SDL_RenderSetViewport(tk->renderer, &area);
 	}
 	// draw buttons
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
-		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/3;
+		tk->curTab->offsetX += (tk->curTab->wantOffsetX - tk->curTab->offsetX)/4;
+	if(fabs(tk->curTab->wantOffsetX - tk->curTab->offsetX) < 4)
+		tk->curTab->offsetX = tk->curTab->wantOffsetX;
 
 	if(tk->curTab->hasButtons == 1)
 	{
@@ -328,7 +330,9 @@ int r_tk_draw(struct r_tk *tk)
 	if(tk->oldTab != NULL)
 	{
 		if(tk->oldTab->wantOffsetX != tk->oldTab->offsetX)
-			tk->oldTab->offsetX += (tk->oldTab->wantOffsetX - tk->oldTab->offsetX)/3;
+			tk->oldTab->offsetX += (tk->oldTab->wantOffsetX - tk->oldTab->offsetX)/4;
+		if(fabs(tk->curTab->wantOffsetX - tk->curTab->offsetX) < 4)
+			tk->oldTab->offsetX = tk->oldTab->wantOffsetX;
 		if(tk->oldTab->hasButtons == 1)
 			draw_tab(tk, tk->oldTab);
 		if(tk->oldTab->wantOffsetX - tk->oldTab->offsetX)
