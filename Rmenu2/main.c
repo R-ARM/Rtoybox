@@ -37,36 +37,24 @@ int loadStaticData(struct r_tk *tk)
 	}
 }
 
+int loadPackageData(struct r_tk *tk)
+{
+}
+
 int main(void)
 {
 	r_init(&renderer, &window, &font, 0xff);
-	toolkit = new_r_tk(&window, &renderer, &font, "Test", buttonStateCallback);
+	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
+	new_btn_list_batch(toolkit, toolkit->tabHead, 3, "Power Off", "Update", "USB Mode");
+	toolkit->tabHead->isList = 1;
 
-	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
-	new_btn(toolkit, toolkit->tabHead, "needs some", 3, 30);
-	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
-	toolkit->tabHead->scrolling = 0;
-
-	new_cotab(toolkit, toolkit->tabHead, 300);
-	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, "this", "is", "a", "test");
-	toolkit->tabHead->coTab->isList = 1;
-	toolkit->tabHead->coTab->scrolling = 1;
-
-	new_tab(toolkit, "Programs");
+	new_tab(toolkit, "Ragnarok Programs");
 	loadStaticData(toolkit);
 	toolkit->tabHead->isList = 1;
 
-	new_tab(toolkit, "3");
-	new_btn_list_batch(toolkit, toolkit->tabHead, 7, "3 btn", "buton", "i", "ran", "out", "of", "names");
+	new_tab(toolkit, "Games");
+	loadPackageData(toolkit);
 	toolkit->tabHead->isList = 1;
-
-	new_tab(toolkit, "four");
-	new_btn(toolkit, toolkit->tabHead, "testinggg", 20, 30);
-	new_btn(toolkit, toolkit->tabHead, "lower button 1", 20, 150);
-	new_btn(toolkit, toolkit->tabHead, "right.", 300, 230);
-	new_btn(toolkit, toolkit->tabHead, "lower button 2", 20, 200);
-	new_btn(toolkit, toolkit->tabHead, "offscreen", 20, 330);
-	toolkit->tabHead->isList = 0;
 
 	SDL_Event event;
 	while (1)
