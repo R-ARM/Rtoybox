@@ -24,6 +24,8 @@ struct r_tk_btn
 	int id;
 	int state;
 	char name[255];
+	void *progData;
+
 	SDL_Rect rect;
 	SDL_Texture *text;
 
