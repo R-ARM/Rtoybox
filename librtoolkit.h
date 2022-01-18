@@ -266,7 +266,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->scrolling = 1;
 	strcpy(initialTab->name, initTabName);
 
-	get_text_and_rect(*renderer, "Test", *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
+	get_text_and_rect(*renderer, initTabName, *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
 
 	tmp->tabHead = initialTab;
 	tmp->tabTail = initialTab;
