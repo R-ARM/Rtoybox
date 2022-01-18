@@ -70,6 +70,10 @@ struct r_tk
 
 	int winX;
 	int winY;
+
+	int tabOffsetX;
+	int tabWantOffsetX;
+
 	int previngTabs;
 	int nextingTabs;
 	int lastBtnId;
@@ -358,16 +362,29 @@ int r_tk_draw(struct r_tk *tk, int width)
 	if(tk->tabTail != tk->tabHead)
 	{
 		tmp = tk->tabTail;
+		int shouldScroll = tk->tabHead->rect.x + tk->tabHead->rect.w > 480; // FIXME
+		int maxScroll = tk->tabHead->rect.x + tk->tabHead->rect.w;
+		tk->tabWantOffsetX = tk->curTab->rect.x;
+		if (shouldScroll)
+		{
+			if (fabs(tk->tabWantOffsetX - tk->tabOffsetX) < 3)
+				tk->tabOffsetX = tk->tabWantOffsetX;
+			if (shouldScroll && tk->tabWantOffsetX != tk->tabOffsetX)
+				tk->tabOffsetX += (tk->tabWantOffsetX - tk->tabOffsetX)/2;
+		}
 		do
 		{
-			tmp->rect.x = i;
-			i += tmp->rect.w + 10; // TODO: screen size scale
+			tmp->rect.x = i - tk->tabOffsetX;
+
 			if(tmp == tk->curTab)
 				SDL_SetTextureColorMod(tmp->text, 255, 0, 0);
 			else
 				SDL_SetTextureColorMod(tmp->text, 255, 255, 255);
 			SDL_RenderCopy(tk->renderer, tmp->text, NULL, &tmp->rect);
 
+			tmp->rect.x = i;
+
+			i += tmp->rect.w + 10; // TODO: screen size scale
 			tmp = tmp->prev;
 		} while(tmp != tk->tabTail);
 
