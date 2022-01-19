@@ -69,6 +69,7 @@ int r_log(int prio, const char *format, ...)
 
 int (*_cb_input_handle)(int, int, int);
 int _is_inp_hand_attach = 0;
+int _r_reopen_joydev = 0;
 pthread_t _r_js_thread;
 pthread_t _r_dk_thread;
 
@@ -87,6 +88,10 @@ int r_attach_input_callback(int (*new_cb)(int, int, int))
 	}
 }
 
+void r_flush_input_events()
+{
+	_r_reopen_joydev = 1;
+}
 
 void _r_upd_joystick(void)
 {
@@ -114,7 +119,7 @@ void _r_upd_joystick(void)
 		while (sleep(10)); // do nothing now
 found:
 
-		while (1)
+		while (_r_reopen_joydev == 0)
 		{
 			rd = read(joyfd, ev, sizeof(struct input_event) * 8);
 			if (rd > 0)
@@ -132,6 +137,8 @@ found:
 				}
 			}
 		}
+		close(joyfd);
+		_r_reopen_joydev = 0;
 	}
 }
 

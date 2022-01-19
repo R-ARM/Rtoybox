@@ -18,6 +18,7 @@ void run_wait(char *path)
 	{
 		int status;
 		waitpid(pidKaszojada, &status, 0);
+		r_flush_input_events();
 	}
 	else
 	{
