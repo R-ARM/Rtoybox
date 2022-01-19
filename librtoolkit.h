@@ -343,10 +343,14 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 
 void r_tk_action(struct r_tk *tk)
 {
+	struct r_tk_btn *tmp = NULL;
+	if(tk->btn_cb == NULL) return;
 	if(tk->curTab->coTab != 0 && tk->curTab->coTabAct == 1)
-		tk->btn_cb(tk->curTab->coTab->curBtn);
+		tmp = tk->curTab->coTab->curBtn;
 	else
-		tk->btn_cb(tk->curTab->curBtn);
+		tmp = tk->curTab->curBtn;
+	if(tmp != NULL && tmp != 0)
+		tk->btn_cb(tmp);
 }
 
 int r_tk_draw(struct r_tk *tk, int width)
