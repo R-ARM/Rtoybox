@@ -8,10 +8,30 @@ TTF_Font *font;
 
 struct r_tk *toolkit;
 
+void run_wait(char *path)
+{
+	pid_t pidKaszojada;
+	log_debug("Running %s\n", path);
+	
+	pidKaszojada = fork();
+	if(pidKaszojada > 0)
+	{
+		int status;
+		waitpid(pidKaszojada, &status, 0);
+	}
+	else
+	{
+		execl(path, (char *)NULL);
+		exit(1);
+	}
+}
+
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	log_debug("button %s state %d\n", btn->name, btn->state);
 	log_debug("prog data: %s\n", (char *)btn->progData);
+	if((char *) btn->progData != NULL)
+		run_wait((char *)btn->progData);
 }
 
 int loadStaticData(struct r_tk *tk)
@@ -52,10 +72,15 @@ int main(void)
 	loadStaticData(toolkit);
 	toolkit->tabHead->isList = 1;
 
+
 	new_tab(toolkit, "Games");
 	loadPackageData(toolkit);
 	toolkit->tabHead->isList = 1;
 
+	new_tab(toolkit, "qwertyuiop");
+	new_tab(toolkit, "asdfghjkl");
+	new_tab(toolkit, "zxcvbnm");
+	
 	SDL_Event event;
 	while (1)
 	{
