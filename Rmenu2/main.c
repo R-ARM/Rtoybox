@@ -73,7 +73,6 @@ int main(void)
 	loadStaticData(toolkit);
 	toolkit->tabHead->isList = 1;
 
-
 	new_tab(toolkit, "Games");
 	loadPackageData(toolkit);
 	toolkit->tabHead->isList = 1;
@@ -104,10 +103,6 @@ int main(void)
 						break;
 					case SDLK_q:
 						r_tk_prev_tab(toolkit);
-						break;
-					case SDLK_a:
-					case SDLK_s:
-						r_tk_toggle_cotab(toolkit);
 						break;
 					case SDLK_z:
 						r_tk_prev_btn(toolkit);
