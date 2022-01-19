@@ -1,145 +1,83 @@
 #include "../libragnarok.h"
+#include "../librtoolkit.h"
+#include <tgmath.h>
 #include <dirent.h>
 
 SDL_Renderer *renderer;
 SDL_Window *window;
 TTF_Font *font;
 
-void get_text_and_rect(SDL_Renderer *renderer, char *text,
-		TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect, int r, int g, int b)
-{
-	int text_width;
-	int text_height;
-	SDL_Surface *surface;
-	SDL_Color textColor = {r, g, b, 0};
+struct r_tk *toolkit;
 
-	surface = TTF_RenderText_Solid(font, text, textColor);
-	*texture = SDL_CreateTextureFromSurface(renderer, surface);
-	text_width = surface->w;
-	text_height = surface->h;
-	SDL_FreeSurface(surface);
-	rect->x = 0;
-	rect->y = 0;
-	rect->w = text_width;
-	rect->h = text_height;
+void buttonStateCallback(struct r_tk_btn *btn)
+{
+	printf("button %s state %d\n", btn->name, btn->state);
 }
 
-int handle_input(int type, int code, int value)
+int main(void)
 {
-	// stub
-	return 0;
-}
-
-struct track {
-	char path[256];
-	char name[256];
-
-	SDL_Rect rect;
-	SDL_Texture *texture;
-
-	struct track *next;
-	struct track *prev;
-};
-
-struct track *trackHead;
-
-struct randomText {
-	char content[256];
-	SDL_Rect rect;
-	SDL_Texture *texture;
-};
-
-struct randomText *filenames;
-
-void push(struct track *head, char *data)
-{
-	struct track *new;
-	new = malloc(sizeof(struct track));
-	strncpy(new->path, data, 255);
-	new->next = head->next;
-	head->next = new;
-}
-
-int howManyFiles = 0;
-
-int main(int argc, char *argv[])
-{
-	r_init(&renderer, &window, &font, ROS_INIT_SDL | ROS_INIT_TTF | ROS_INIT_INPUT);
-	r_attach_input_callback(handle_input);
-
-	trackHead = malloc(sizeof(struct track));
-
-
-	filenames = malloc(sizeof(struct randomText));
-	strcpy(filenames->content, "Filenames");
-	get_text_and_rect(renderer, filenames->content, font, &filenames->texture, &filenames->rect, 255, 255, 255);
-	filenames->rect.x = 0;
-	filenames->rect.y = 0;
-
-	srand(time(0));
-
+	r_init(&renderer, &window, &font, 0xff);
+	toolkit = new_r_tk(&window, &renderer, &font, "Tracks", buttonStateCallback);
 	DIR *d;
-	struct dirent *dir;
-	chdir(argv[1]);
-	d = opendir(".");
-	if (d)
+	struct dirent *ent;
+	d = opendir("./music");
+	if(d)
 	{
-		while ((dir = readdir(d)) != NULL)
+		while((ent = readdir(d)) != NULL)
 		{
-			if (dir->d_type == DT_REG)
+			if(ent->d_type == DT_REG)
 			{
-				log_debug("Loading %s\n", realpath(dir->d_name, NULL));
-				push(trackHead, realpath(dir->d_name, NULL));
-				
-				get_text_and_rect(renderer, trackHead->next->path, font, &trackHead->next->texture, &trackHead->next->rect, 255, 255, 255);
-				howManyFiles++;
+				log_debug("Loading %s\n", ent->d_name);
+				new_btn(toolkit, toolkit->tabHead, ent->d_name, 0, 0);
 			}
 		}
-		closedir(d);
+	}
+	else
+	{
+		log_err("Failed opening directory\n");
+		exit(1);
 	}
 
-
-	struct track *cur;
-	int i = 0;
-
+	toolkit->tabHead->isList = 1;
 
 	SDL_Event event;
 	while (1)
 	{
+		SDL_RenderClear(renderer);
+		r_tk_draw(toolkit, 480);
+		SDL_RenderPresent(renderer);
+
 		while(SDL_PollEvent(&event) == 1)
 		{
 			switch(event.type)
 			{
 				case SDL_QUIT:
-					r_quit(renderer, window);
+					exit(0);
 					break;
+				case SDL_KEYDOWN:
+					switch(event.key.keysym.sym)
+					{
+					case SDLK_w:
+						r_tk_next_tab(toolkit);
+						break;
+					case SDLK_q:
+						r_tk_prev_tab(toolkit);
+						break;
+					case SDLK_a:
+					case SDLK_s:
+						r_tk_toggle_cotab(toolkit);
+						break;
+					case SDLK_z:
+						r_tk_prev_btn(toolkit);
+						break;
+					case SDLK_x:
+						r_tk_next_btn(toolkit);
+						break;
+					case SDLK_e:
+						r_tk_action(toolkit);
+						break;
+					}
 			}
 		}
-
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_RenderClear(renderer);
-		
-		cur = trackHead->next;
-		i = 0;
-		while(i < howManyFiles)
-		{
-
-			cur->rect.x = 0;
-			cur->rect.y = (i+1) * 22;
-
-			SDL_RenderCopy(renderer, cur->texture, NULL, &cur->rect);
-
-			i++;
-			cur = cur->next;
-		}
-
-
-		SDL_RenderCopy(renderer, filenames->texture, NULL, &filenames->rect);
-
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_RenderDrawLine(renderer, 0, 23, 480, 23);
-
-		SDL_RenderPresent(renderer);
 	}
 }
