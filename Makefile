@@ -1,3 +1,3 @@
 default:
-	make -C Rmenu
+	make -C Rmenu2
 	make -C Rdevkit
