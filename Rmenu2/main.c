@@ -9,21 +9,19 @@ TTF_Font *font;
 
 struct r_tk *toolkit;
 
-#define TYPE_ROM	1
-#define TYPE_PROG	2
-#define TYPE_SPECIAL	3
+enum btnType{rom, prog, special};
 
 struct btnData
 {
-	int type;
+	enum btnType type;
 	char emu[256];
 	char path[256];
 };
 
-void run_wait(char *path)
+void run_wait(char *path, char *arg1)
 {
 	pid_t pidKaszojada;
-	log_debug("Running %s\n", path);
+	log_debug("Running %s %s\n", path, arg1);
 	
 	pidKaszojada = fork();
 	if(pidKaszojada > 0)
@@ -34,21 +32,34 @@ void run_wait(char *path)
 	}
 	else
 	{
-		execl(path, (char *)NULL);
+		execl(path, path, arg1);
 		exit(1);
 	}
 }
 
 void buttonStateCallback(struct r_tk_btn *btn)
 {
+	struct btnData *tmp;
 	log_debug("button %s state %d\n", btn->name, btn->state);
 	log_debug("prog data: %s\n", (char *)btn->progData);
-	if((char *) btn->progData != NULL)
-		run_wait((char *)btn->progData);
+	if(btn->progData != NULL)
+	{
+		tmp = (struct btnData *)btn->progData;
+		switch(tmp->type)
+		{
+			case prog:
+				run_wait(tmp->path, "");
+				break;
+			case rom:
+				run_wait(tmp->emu, tmp->path);
+				break;
+		}
+	}
 }
 
 int loadStaticData(struct r_tk *tk)
 {
+	struct btnData *tmpData;
 	FILE *in = fopen("programs", "r");
 	if(!in)
 	{
@@ -67,9 +78,11 @@ int loadStaticData(struct r_tk *tk)
 			break;
 
 		new_btn(tk, tk->tabHead, tmp, 0, 0);
-		tk->tabHead->btnTail->progData = malloc(strlen(tmp2)+1);
-		strcpy(tk->tabHead->btnTail->progData, tmp2);
+		tmpData = malloc(sizeof(struct btnData));
+		tmpData->type = prog;
+		strcpy(tmpData->path, tmp2);
 
+		tk->tabHead->btnHead->progData = tmpData;
 	}
 }
 
@@ -132,6 +145,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 				strncpy(fancyName, ent->d_name, strlen(ent->d_name) - (1+strlen(ext)));
 				new_btn(tk, tk->tabHead, fancyName, 0, 0);
 				tmp = malloc(sizeof(struct btnData));
+				tmp->type = rom;
 				strcpy(tmp->emu, emu);
 				strcpy(tmp->path, ent->d_name);
 				tk->tabHead->btnTail->progData = tmp;
