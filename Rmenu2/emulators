@@ -1,0 +1,6 @@
+{
+command mgba
+system GBA
+ext gba
+args __none__
+}

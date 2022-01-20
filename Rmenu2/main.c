@@ -1,10 +1,18 @@
 #include "../libragnarok.h"
 #include "../librtoolkit.h"
 #include <tgmath.h>
+#include <dirent.h>
 
 SDL_Renderer *renderer;
 SDL_Window *window;
 TTF_Font *font;
+
+struct btnData
+{
+	int type;
+	char emu[256];
+	char path[256];
+};
 
 struct r_tk *toolkit;
 
@@ -39,7 +47,10 @@ int loadStaticData(struct r_tk *tk)
 {
 	FILE *in = fopen("programs", "r");
 	if(!in)
+	{
 		log_err("Error reading program list file\n");
+		return 1;
+	}
 
 	char tmp[256];
 	char tmp2[256];
@@ -62,6 +73,74 @@ int loadPackageData(struct r_tk *tk)
 {
 }
 
+int loadEmulators(struct r_tk *tk)
+{
+	char cmd[256];
+	char system[256];
+	char args[256];
+	char ext[256];
+
+	log_debug("Loading emulator config file\n");
+
+	FILE *emus = fopen("emulators", "r");
+	if(!emus)
+	{
+		log_err("Failed to open emulator config file\n");
+		return 1;
+	}
+	while(1)
+	{
+		fscanf(emus, "{\ncommand %s\nsystem %s\next %s\nargs %s\n}", cmd, system, ext, args);
+		if(feof(emus) != 0)
+			break;
+
+		if(strncmp("__none__", args, 8) == 0)
+			args[0] = '\0';
+		log_debug("__func__: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
+		loadRomList(tk, ext, cmd, system);
+		break;
+	}
+}
+
+int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
+{
+	char temp[256];
+	char fancyName[256];
+	strcpy(temp, "./roms/");
+	strcat(temp, system);
+	strcat(temp, "/");
+	log_debug("Looking for %s roms in %s\n", system, temp);
+	int i = 0;
+
+	DIR *d;
+	struct dirent *ent;
+	d = opendir(temp);
+	if(d)
+	{
+		while((ent = readdir(d)) != NULL)
+		{
+			if(ent->d_type == DT_REG)
+			{
+				if(i == 0)
+					new_tab(tk, system);
+				strncpy(fancyName, ent->d_name, strlen(ent->d_name) - (1+strlen(ext)));
+				new_btn(tk, tk->tabHead, fancyName, 0, 0);
+				i++;
+			}
+		}
+		toolkit->tabHead->isList = 1;
+	}
+	else
+	{
+		log_warn("Failed opening %s directory\n", temp);
+		return 1;
+	}
+	if(i == 0)
+		log_debug("No %s roms found in %s\n", system, temp);
+	else
+		log_debug("Found %d roms for %s\n", i, system);
+}
+
 int main(void)
 {
 	r_init(&renderer, &window, &font, 0xff);
@@ -73,13 +152,12 @@ int main(void)
 	loadStaticData(toolkit);
 	toolkit->tabHead->isList = 1;
 
-	new_tab(toolkit, "Games");
+	new_tab(toolkit, "Ports");
 	loadPackageData(toolkit);
 	toolkit->tabHead->isList = 1;
 
-	new_tab(toolkit, "qwertyuiop");
-	new_tab(toolkit, "asdfghjkl");
-	new_tab(toolkit, "zxcvbnm");
+	loadEmulators(toolkit);
+	//loadRomList(toolkit, "gba", "mgba", "GBA");
 	
 	SDL_Event event;
 	while (1)
