@@ -2,6 +2,7 @@
 #include "../librtoolkit.h"
 #include <tgmath.h>
 #include <dirent.h>
+#include <errno.h>
 
 SDL_Renderer *renderer;
 SDL_Window *window;
@@ -32,7 +33,11 @@ void run_wait(char *path, char *arg1)
 	}
 	else
 	{
-		execl(path, path, arg1);
+		if(strlen(arg1) > 0)
+			execl(path, path, arg1, NULL);
+		else
+			execl(path, path, NULL);
+		log_err("Error running %s: %s\n", path, strerror(errno));
 		exit(1);
 	}
 }
@@ -124,6 +129,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 {
 	char temp[256];
 	char fancyName[256];
+	char fullPath[256];
 	strcpy(temp, "./roms/");
 	strcat(temp, system);
 	strcat(temp, "/");
@@ -147,7 +153,8 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 				tmp = malloc(sizeof(struct btnData));
 				tmp->type = rom;
 				strcpy(tmp->emu, emu);
-				strcpy(tmp->path, ent->d_name);
+				strcpy(fullPath, temp);
+				strcpy(tmp->path, strcat(fullPath, ent->d_name));
 				tk->tabHead->btnTail->progData = tmp;
 				i++;
 			}
