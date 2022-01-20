@@ -65,7 +65,11 @@ void buttonStateCallback(struct r_tk_btn *btn)
 int loadStaticData(struct r_tk *tk)
 {
 	struct btnData *tmpData;
+#ifdef ROS
+	FILE *in = fopen("/etc/rmenu/programs", "r");
+#else
 	FILE *in = fopen("programs", "r");
+#endif
 	if(!in)
 	{
 		log_err("Error reading program list file\n");
@@ -104,7 +108,11 @@ int loadEmulators(struct r_tk *tk)
 
 	log_debug("Loading emulator config file\n");
 
+#ifdef ROS
+	FILE *emus = fopen("/etc/rmenu/emulators", "r");
+#else
 	FILE *emus = fopen("emulators", "r");
+#endif
 	if(!emus)
 	{
 		log_err("Failed to open emulator config file\n");
@@ -130,7 +138,11 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 	char temp[256];
 	char fancyName[256];
 	char fullPath[256];
+#ifdef ROS
+	strcpy(temp, "/roms/");
+#else
 	strcpy(temp, "./roms/");
+#endif
 	strcat(temp, system);
 	strcat(temp, "/");
 	log_debug("Looking for %s roms in %s\n", system, temp);
