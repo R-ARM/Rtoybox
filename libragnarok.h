@@ -93,31 +93,56 @@ void r_flush_input_events()
 	_r_reopen_joydev = 1;
 }
 
+int _r_find_rinputer(int *hint)
+{
+	char name[32];
+	char dev[20];
+	int joyfd;
+	if(*hint > 0)
+	{
+		sprintf(dev, "/dev/input/event%d", *hint);
+		joyfd = open(dev, O_RDONLY);
+		if(ioctl(joyfd, EVIOCGNAME(32), name) < 0)
+			close(joyfd);
+		else
+			if(!strcmp(name, "Rinputer"))
+				return joyfd;
+			else
+				close(joyfd);
+	}
+	for(int i = 0; i < 10; i++)
+	{
+		sprintf(dev, "/dev/input/event%d", i);
+		joyfd = open(dev, O_RDONLY);
+		if(ioctl(joyfd, EVIOCGNAME(32), name) < 0)
+			close(joyfd);
+		else
+			if(!strcmp(name, "Rinputer"))
+			{
+				*hint = i;
+				return joyfd;
+			}
+			else
+				close(joyfd);
+	}
+	log_err("Missing Rinputer device!\n");
+	return -1;
+}
+
 void _r_upd_joystick(void)
 {
 	int rd, joyfd, i;
+	int *hint = malloc(sizeof(int));
 	struct input_event ev[8];
 
 	char dev[20];
 	char name[32];
 
+	joyfd = _r_find_rinputer(hint);
+	if(joyfd < 0)
+		return;
 	while (1)
 	{
-		for (i = 0; i < 10; i++)
-		{
-			sprintf(dev, "/dev/input/event%d", i);
-			joyfd = open(dev, O_RDONLY);
-			if (ioctl(joyfd, EVIOCGNAME(32), name) < 0)
-				close(joyfd);
-			else
-				if (!strcmp(name, "Rinputer"))
-					goto found;
-				else
-					close(joyfd);
-		}
-		log_err("Missing Rinputer device!\n");
-		while (sleep(10)); // do nothing now
-found:
 
 		while (_r_reopen_joydev == 0)
 		{
@@ -138,6 +163,7 @@ found:
 			}
 		}
 		close(joyfd);
+		joyfd = _r_find_rinputer(hint);
 		_r_reopen_joydev = 0;
 	}
 }
