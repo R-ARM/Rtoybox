@@ -8,16 +8,28 @@ SDL_Window *window;
 TTF_Font *font;
 
 struct r_tk *toolkit;
+int numFiles = 0;
 
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	printf("button %s state %d\n", btn->name, btn->state);
 }
 
+void getRandomFile(struct r_tk_tab *tab)
+{
+	struct r_tk_btn *button = tab->btnTail;
+	int randId = rand() % numFiles;
+	log_debug("Loading fileID %d\n", randId);
+	while(button->id != randId) // TODO: timeout
+		button = button->prev;
+	log_debug("Random filename: %s\n", button->name);
+}
+
 int main(void)
 {
 	r_init(&renderer, &window, &font, 0xff);
 	toolkit = new_r_tk(&window, &renderer, &font, "Tracks", buttonStateCallback);
+	srand(time(0));
 	DIR *d;
 	struct dirent *ent;
 	d = opendir("./music");
@@ -29,6 +41,7 @@ int main(void)
 			{
 				log_debug("Loading %s\n", ent->d_name);
 				new_btn(toolkit, toolkit->tabHead, ent->d_name, 0, 0);
+				numFiles++;
 			}
 		}
 	}
@@ -37,6 +50,8 @@ int main(void)
 		log_err("Failed opening directory\n");
 		exit(1);
 	}
+	log_debug("Loaded %d files\n", numFiles);
+	getRandomFile(toolkit->curTab);
 
 	toolkit->tabHead->isList = 1;
 
