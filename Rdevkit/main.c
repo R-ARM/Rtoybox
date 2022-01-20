@@ -184,18 +184,23 @@ int main()
 						case SDLK_RIGHT:
 							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_DPAD_RIGHT, evState);
 							break;
-						case SDLK_d: // A
+						case SDLK_a: // A
 							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_EAST, evState);
 							break;
-						case SDLK_x: // B
+						case SDLK_b: // B
 							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_SOUTH, evState);
 							break;
-						case SDLK_s: // X
+						case SDLK_x: // X
 							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_NORTH, evState);
 							break;
-						case SDLK_z: // Y
+						case SDLK_y: // Y
 							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_WEST, evState);
 							break;
+						case SDLK_r:
+							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_TR, evState);
+							break;
+						case SDLK_l:
+							send_dk_msg(connfd, R_MSG_INPUT, EV_KEY, BTN_TL, evState);
 					}
 					send_dk_msg(connfd, R_MSG_INPUT, EV_SYN, SYN_REPORT, 1);
 			}
