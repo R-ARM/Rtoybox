@@ -7,14 +7,18 @@ SDL_Renderer *renderer;
 SDL_Window *window;
 TTF_Font *font;
 
+struct r_tk *toolkit;
+
+#define TYPE_ROM	1
+#define TYPE_PROG	2
+#define TYPE_SPECIAL	3
+
 struct btnData
 {
 	int type;
 	char emu[256];
 	char path[256];
 };
-
-struct r_tk *toolkit;
 
 void run_wait(char *path)
 {
@@ -90,17 +94,18 @@ int loadEmulators(struct r_tk *tk)
 	}
 	while(1)
 	{
-		fscanf(emus, "{\ncommand %s\nsystem %s\next %s\nargs %s\n}", cmd, system, ext, args);
-		if(feof(emus) != 0)
-			break;
+		fscanf(emus, "{\ncommand %s\nsystem %s\next %s\nargs %s\n}\n", cmd, system, ext, args);
 
 		if(strncmp("__none__", args, 8) == 0)
 			args[0] = '\0';
-		log_debug("__func__: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
+		log_debug("Got config entry: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
 		loadRomList(tk, ext, cmd, system);
-		break;
+		
+		if(feof(emus) != 0)
+			break;
 	}
 }
+
 
 int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 {
@@ -112,6 +117,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 	log_debug("Looking for %s roms in %s\n", system, temp);
 	int i = 0;
 
+	struct btnData *tmp;
 	DIR *d;
 	struct dirent *ent;
 	d = opendir(temp);
@@ -125,6 +131,10 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 					new_tab(tk, system);
 				strncpy(fancyName, ent->d_name, strlen(ent->d_name) - (1+strlen(ext)));
 				new_btn(tk, tk->tabHead, fancyName, 0, 0);
+				tmp = malloc(sizeof(struct btnData));
+				strcpy(tmp->emu, emu);
+				strcpy(tmp->path, ent->d_name);
+				tk->tabHead->btnTail->progData = tmp;
 				i++;
 			}
 		}
