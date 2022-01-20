@@ -1,6 +1,12 @@
 {
-command mgba
+command /home/macc24/mgba/build/sdl/mgba
 system GBA
 ext gba
+args __none__
+}
+{
+command fceux
+system NES
+ext nes
 args __none__
 }
