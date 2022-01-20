@@ -146,6 +146,9 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 		{
 			if(ent->d_type == DT_REG)
 			{
+				if(!!(strcmp(strrchr(ent->d_name, '\0') - 3, ext)))
+					continue; // wrong extension
+
 				if(i == 0)
 					new_tab(tk, system);
 				strncpy(fancyName, ent->d_name, strlen(ent->d_name) - (1+strlen(ext)));
