@@ -15,7 +15,7 @@ void buttonStateCallback(struct r_tk_btn *btn)
 	printf("button %s state %d\n", btn->name, btn->state);
 }
 
-void getRandomFile(struct r_tk_tab *tab)
+char* getRandomFile(struct r_tk_tab *tab)
 {
 	struct r_tk_btn *button = tab->btnTail;
 	int randId = rand() % numFiles;
@@ -23,6 +23,7 @@ void getRandomFile(struct r_tk_tab *tab)
 	while(button->id != randId) // TODO: timeout
 		button = button->prev;
 	log_debug("Random filename: %s\n", button->name);
+	return button->name;
 }
 
 int main(void)
@@ -30,6 +31,7 @@ int main(void)
 	r_init(&renderer, &window, &font, 0xff);
 	toolkit = new_r_tk(&window, &renderer, &font, "Tracks", buttonStateCallback);
 	srand(time(0));
+	char *nowPlaying;
 	DIR *d;
 	struct dirent *ent;
 	d = opendir("./music");
@@ -51,7 +53,8 @@ int main(void)
 		exit(1);
 	}
 	log_debug("Loaded %d files\n", numFiles);
-	getRandomFile(toolkit->curTab);
+	nowPlaying = getRandomFile(toolkit->curTab);
+	log_debug("Now playing: %s\n", nowPlaying);
 
 	toolkit->tabHead->isList = 1;
 
