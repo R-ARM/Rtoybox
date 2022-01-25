@@ -15,7 +15,7 @@ char *nextName = NULL;
 
 void buttonStateCallback(struct r_tk_btn *btn)
 {
-	log_debug("Forcing new file and sending EOS\n");
+	log_debug("Forcing new file and forcing new track\n");
 	nextName = btn->name;
 	force_new_track(md);
 }
