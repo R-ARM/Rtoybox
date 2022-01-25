@@ -11,10 +11,13 @@ TTF_Font *font;
 struct r_media *md;
 struct r_tk *toolkit;
 int numFiles = 0;
+char *nextName = NULL;
 
 void buttonStateCallback(struct r_tk_btn *btn)
 {
-	printf("button %s state %d\n", btn->name, btn->state);
+	log_debug("Forcing new file and sending EOS\n");
+	nextName = btn->name;
+	force_new_track(md);
 }
 
 char* getRandomFile(struct r_tk_tab *tab)
@@ -33,7 +36,14 @@ static gboolean load_new (GstElement * playbin, gpointer udata)
 	log_debug("Loading new file\n");
 	// TODO: not shuffle
 	char newUri[256] = "file://";
-	strncat(newUri, realpath(getRandomFile(toolkit->curTab), NULL), 248);
+	if(nextName != NULL)
+	{
+		strncat(newUri, realpath(nextName, NULL), 248);
+		nextName = NULL;
+	}
+	else
+		strncat(newUri, realpath(getRandomFile(toolkit->curTab), NULL), 248);
+
 	log_debug("Playing: %s\n", newUri);
 	g_object_set(playbin, "uri", newUri, NULL);
 	return TRUE;
