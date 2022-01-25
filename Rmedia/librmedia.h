@@ -52,6 +52,27 @@ static gboolean handle_bus(GstBus *bus, GstMessage *msg, gpointer data)
 	return TRUE;
 }
 
+float get_sec_pos(struct r_media *tmp)
+{
+	gint64 pos;
+	gst_element_query_position(tmp->playbin, GST_FORMAT_TIME, &pos);
+	return (float)(pos / 1000000000); // convert into sec
+}
+
+void seek_sec(struct r_media *tmp, float interval)
+{
+	float pos = get_sec_pos(tmp);
+	if(pos+interval < 0)
+		gst_element_seek_simple(tmp->playbin, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT, 0 * GST_SECOND);
+	else
+		gst_element_seek_simple(tmp->playbin, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT, (pos+interval) * GST_SECOND);
+}
+
+void force_new_track(struct r_media *tmp)
+{
+	gst_element_seek_simple(tmp->playbin, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT, 99999999 * GST_SECOND);
+}
+
 struct r_media * new_rm()
 {
 	struct r_media *tmp = malloc(sizeof(struct r_media));

@@ -98,40 +98,30 @@ int main(void)
 				case SDL_KEYDOWN:
 					switch(event.key.keysym.sym)
 					{
-					case SDLK_w:
-						// trigger right
-						// next track
+					case SDLK_w: // trigger right
+						force_new_track(md);
 						break;
-					case SDLK_q:
-						// trigger left
-						// prev track
+					case SDLK_q: // trigger left
+						// prev track TODO
 						break;
-					case SDLK_a:
-						// left button
-						// rewind 5s
-					case SDLK_s:
-						// right button
-						// skip 5s
-						r_tk_toggle_cotab(toolkit);
+					case SDLK_a: // left
+						seek_sec(md, -5);
 						break;
-					case SDLK_z:
-						// down
+					case SDLK_s: // right
+						seek_sec(md, 5);
+						break;
+					case SDLK_z: // down
 						r_tk_prev_btn(toolkit);
 						break;
-					case SDLK_x:
-						// up
+					case SDLK_x: // up
 						r_tk_next_btn(toolkit);
 						break;
-					case SDLK_e:
-						// A
+					case SDLK_e: // A
 						// play/pause
 						r_tk_action(toolkit);
 						break;
-						// B
-						// load new track
-						// X
-						// switch cotab
-						// Y
+					case SDLK_t: // B
+						break;
 					}
 			}
 		}
