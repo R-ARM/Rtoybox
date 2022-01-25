@@ -77,6 +77,7 @@ int main(void)
 		log_err("Failed to set pipeline into playing state\n");
 		return 1;
 	}
+	md->playing = 1;
 
 
 	toolkit->tabHead->isList = 1;
@@ -117,10 +118,11 @@ int main(void)
 						r_tk_next_btn(toolkit);
 						break;
 					case SDLK_e: // A
-						// play/pause
+						// load new track
 						r_tk_action(toolkit);
 						break;
 					case SDLK_t: // B
+						play_pause(md);
 						break;
 					}
 			}

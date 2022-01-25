@@ -18,6 +18,8 @@ struct r_media
 	GstElement *playbin;
 	GMainLoop *main_loop;
 
+	int playing;
+
 	pthread_t _main_loop_thread;
 };
 
@@ -71,6 +73,15 @@ void seek_sec(struct r_media *tmp, float interval)
 void force_new_track(struct r_media *tmp)
 {
 	gst_element_seek_simple(tmp->playbin, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT, 99999999 * GST_SECOND);
+}
+
+void play_pause(struct r_media *tmp)
+{
+	if(tmp->playing)
+		gst_element_set_state(tmp->playbin, GST_STATE_PAUSED);
+	else
+		gst_element_set_state(tmp->playbin, GST_STATE_PLAYING);
+	tmp->playing = !tmp->playing;
 }
 
 struct r_media * new_rm()
