@@ -1,11 +1,17 @@
 {
-command /usr/bin/mgba
+command /usr/bin/mednafen
 system GBA
 ext gba
-args -f
+args __none__
 }
 {
-command fceux
+command /usr/bin/mednafen
+system GB
+ext gb
+args __none__
+}
+{
+command /usr/bin/mednafen
 system NES
 ext nes
 args __none__
