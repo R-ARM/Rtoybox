@@ -1,5 +1,5 @@
 {
-command /home/macc24/mgba/build/sdl/mgba
+command /usr/bin/mgba
 system GBA
 ext gba
 args -f
