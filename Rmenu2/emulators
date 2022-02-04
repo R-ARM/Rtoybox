@@ -2,7 +2,7 @@
 command /home/macc24/mgba/build/sdl/mgba
 system GBA
 ext gba
-args __none__
+args -f
 }
 {
 command fceux

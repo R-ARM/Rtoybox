@@ -17,12 +17,13 @@ struct btnData
 	enum btnType type;
 	char emu[256];
 	char path[256];
+	char arg[256];
 };
 
-void run_wait(char *path, char *arg1)
+void run_wait(char *path, char *arg1, char *arg2)
 {
 	pid_t pidKaszojada;
-	log_debug("Running %s %s\n", path, arg1);
+	log_debug("Running %s %s %s\n", path, arg1, arg2);
 	
 	pidKaszojada = fork();
 	if(pidKaszojada > 0)
@@ -34,9 +35,9 @@ void run_wait(char *path, char *arg1)
 	else
 	{
 		if(strlen(arg1) > 0)
-			execl(path, path, arg1, NULL);
+			execl(path, path, arg1, arg2, NULL);
 		else
-			execl(path, path, NULL);
+			execl(path, path, arg2, NULL);
 		log_err("Error running %s: %s\n", path, strerror(errno));
 		exit(1);
 	}
@@ -53,10 +54,10 @@ void buttonStateCallback(struct r_tk_btn *btn)
 		switch(tmp->type)
 		{
 			case prog:
-				run_wait(tmp->path, "");
+				run_wait(tmp->path, "", "");
 				break;
 			case rom:
-				run_wait(tmp->emu, tmp->path);
+				run_wait(tmp->emu, tmp->path, tmp->arg);
 				break;
 		}
 	}
@@ -125,7 +126,7 @@ int loadEmulators(struct r_tk *tk)
 		if(strncmp("__none__", args, 8) == 0)
 			args[0] = '\0';
 		log_debug("Got config entry: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
-		loadRomList(tk, ext, cmd, system);
+		loadRomList(tk, ext, cmd, system, args);
 		
 		if(feof(emus) != 0)
 			break;
@@ -133,7 +134,7 @@ int loadEmulators(struct r_tk *tk)
 }
 
 
-int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
+int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 {
 	char temp[256];
 	char fancyName[256];
@@ -169,6 +170,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system)
 				tmp->type = rom;
 				strcpy(tmp->emu, emu);
 				strcpy(fullPath, temp);
+				strcpy(tmp->arg, args);
 				strcpy(tmp->path, strcat(fullPath, ent->d_name));
 				tk->tabHead->btnTail->progData = tmp;
 				i++;
