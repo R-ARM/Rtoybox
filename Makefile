@@ -1,4 +1,4 @@
 default:
-	make -C Rmenu2
-	make -C Rmedia
-	make -C Rdevkit
+	make -C Rmenu2	CFLAGS=$(CFLAGS)
+	make -C Rmedia	CFLAGS=$(CFLAGS)
+	make -C Rdevkit	CFLAGS=$(CFLAGS)
