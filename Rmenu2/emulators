@@ -16,3 +16,9 @@ system NES
 ext nes
 args __none__
 }
+{
+command /usr/bin/mednafen
+system SNES
+ext smc
+args __none__
+}
