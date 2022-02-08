@@ -157,7 +157,7 @@ struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 	tmp = malloc(sizeof(struct r_tk_tab));
 
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
-	strncpy(255, tmp->name, name);
+	strncpy(tmp->name, name, 254);
 
 	tmp->id = tk->tabHead->id + 1;
 	tmp->hasButtons = 0;
@@ -202,7 +202,7 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tmp = malloc(sizeof(struct r_tk_btn));
 
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
-	strncpy(256, tmp->name, name);
+	strncpy(tmp->name, name, 254);
 
 	tmp->id = tk->lastBtnId++;
 	tmp->rect.x = x;
@@ -270,7 +270,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->scrolling = 1;
 	initialTab->coTab = 0;
 	initialTab->coTabAct = 0;
-	strncpy(255, initialTab->name, initTabName);
+	strncpy(initialTab->name, initTabName, 254);
 
 	get_text_and_rect(*renderer, initTabName, *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
 
