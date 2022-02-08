@@ -224,7 +224,7 @@ int r_init(SDL_Renderer **renderer, SDL_Window **window, TTF_Font **font, uint64
 			exit(1);
 		}
 
-		if (SDL_CreateWindowAndRenderer(480, 320, SDL_WINDOW_SHOWN, window, renderer) < 0)
+		if (SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP, window, renderer) < 0)
 		{
 			log_err("Error creating SDL window:\n%s\n", SDL_GetError());
 			exit(1);

@@ -29,7 +29,9 @@ void run_wait(char *path, char *arg1, char *arg2)
 	if(pidKaszojada > 0)
 	{
 		int status;
+		SDL_HideWindow(window);
 		waitpid(pidKaszojada, &status, 0);
+		SDL_ShowWindow(window);
 		r_flush_input_events();
 	}
 	else
