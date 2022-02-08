@@ -159,13 +159,14 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 		{
 			if(ent->d_type == DT_REG)
 			{
-				if(!!(strcmp(strrchr(ent->d_name, '\0') - 3, ext)))
-					continue; // wrong extension
+//				if(!!(strcmp(strrchr(ent->d_name, '\0') - 3, ext)))
+//					continue; // wrong extension
 
 				if(i == 0)
 					new_tab(tk, system);
-				strncpy(fancyName, ent->d_name, strlen(ent->d_name) - (1+strlen(ext)));
-				new_btn(tk, tk->tabHead, fancyName, 0, 0);
+//				strncpy(fancyName, ent->d_name, strlen(ent->d_name) - (1+strlen(ext)));
+//				new_btn(tk, tk->tabHead, fancyName, 0, 0);
+				new_btn(tk, tk->tabHead, ent->d_name, 0, 0);
 				tmp = malloc(sizeof(struct btnData));
 				tmp->type = rom;
 				strcpy(tmp->emu, emu);
