@@ -22,3 +22,9 @@ system SNES
 ext smc
 args __none__
 }
+{
+command /bin/PPSSPPSDL
+system PSP
+ext iso
+args __none__
+}
