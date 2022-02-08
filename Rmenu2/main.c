@@ -36,10 +36,13 @@ void run_wait(char *path, char *arg1, char *arg2)
 	}
 	else
 	{
-		if(strlen(arg1) > 0)
+		if(strlen(arg2) > 0)
 			execl(path, path, arg1, arg2, NULL);
 		else
-			execl(path, path, arg2, NULL);
+			if(strlen(arg1) > 0)			
+				execl(path, path, arg1, NULL);
+			else
+				execl(path, path, NULL);
 		log_err("Error running %s: %s\n", path, strerror(errno));
 		exit(1);
 	}
