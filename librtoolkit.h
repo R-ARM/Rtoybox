@@ -367,6 +367,14 @@ int r_tk_draw(struct r_tk *tk, int width)
 	int i = 0;
 	if(tk->tabTail != tk->tabHead)
 	{
+
+		SDL_Rect tabs;
+		tabs.x = 0;
+		tabs.y = 0;
+		tabs.w = width; // TODO: screen size scale
+		tabs.h = 26;
+
+		SDL_RenderSetViewport(tk->renderer, &tabs);
 		tmp = tk->tabTail;
 		int shouldScroll = tk->tabHead->rect.x + tk->tabHead->rect.w > 480; // FIXME
 		int maxScroll = tk->tabHead->rect.x + tk->tabHead->rect.w;
@@ -394,18 +402,18 @@ int r_tk_draw(struct r_tk *tk, int width)
 			tmp = tmp->prev;
 		} while(tmp != tk->tabTail);
 
-		// line separating tabs and other widgets
-		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
-		SDL_RenderDrawLine(tk->renderer, 0, 25, 480, 25);
-		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
-
 		SDL_Rect area;
 		area.x = 0;
-		area.y = 25;
+		area.y = 27;
 		area.w = width; // TODO: screen size scale
-		area.h = 320 - 25;
+		area.h = 320 - 27;
 
 		SDL_RenderSetViewport(tk->renderer, &area);
+
+		// line separating tabs and other widgets
+		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
+		SDL_RenderDrawLine(tk->renderer, 0, 1, 480, 1);
+		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 	}
 	// draw buttons
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
