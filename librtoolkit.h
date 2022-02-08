@@ -268,6 +268,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->wantOffsetX = 0;
 	initialTab->wantOffsetY = 0;
 	initialTab->scrolling = 1;
+	initialTab->coTab = 0;
+	initialTab->coTabAct = 0;
 	strncpy(255, initialTab->name, initTabName);
 
 	get_text_and_rect(*renderer, initTabName, *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
