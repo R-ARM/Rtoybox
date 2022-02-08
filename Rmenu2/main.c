@@ -106,7 +106,7 @@ int loadStaticData(struct r_tk *tk)
 		tmpData->type = prog;
 		strcpy(tmpData->path, tmp2);
 
-		tk->tabHead->btnHead->progData = tmpData;
+		tk->tabHead->btnTail->progData = tmpData;
 	}
 }
 
