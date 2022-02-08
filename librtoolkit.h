@@ -157,7 +157,7 @@ struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 	tmp = malloc(sizeof(struct r_tk_tab));
 
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
-	strcpy(tmp->name, name);
+	strncpy(255, tmp->name, name);
 
 	tmp->id = tk->tabHead->id + 1;
 	tmp->hasButtons = 0;
@@ -202,7 +202,7 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tmp = malloc(sizeof(struct r_tk_btn));
 
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
-	strcpy(tmp->name, name);
+	strncpy(256, tmp->name, name);
 
 	tmp->id = tk->lastBtnId++;
 	tmp->rect.x = x;
@@ -268,7 +268,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->wantOffsetX = 0;
 	initialTab->wantOffsetY = 0;
 	initialTab->scrolling = 1;
-	strcpy(initialTab->name, initTabName);
+	strncpy(255, initialTab->name, initTabName);
 
 	get_text_and_rect(*renderer, initTabName, *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
 
@@ -419,7 +419,7 @@ int r_tk_draw(struct r_tk *tk, int width)
 			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
 				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
 		}
-		if(tk->curTab->coTab && tk->curTab->coTab->scrolling == 1)
+		if(tk->curTab->coTab != 0 && tk->curTab->coTab->scrolling == 1)
 		{
 			tk->curTab->coTab->wantOffsetY = tk->curTab->coTab->curBtn->rect.y - 25;
 			if(tk->curTab->coTab->wantOffsetY != tk->curTab->coTab->offsetY)
