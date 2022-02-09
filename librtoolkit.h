@@ -71,6 +71,9 @@ struct r_tk
 	int winX;
 	int winY;
 
+	int width;
+	int height;
+
 	int tabOffsetX;
 	int tabWantOffsetX;
 
@@ -91,12 +94,12 @@ void r_tk_next_tab(struct r_tk *tk)
 	if(tk->curTab != tk->curTab->prev)
 	{
 		tk->curTab->offsetX = 0;
-		tk->curTab->wantOffsetX = -480; // TODO: screen scaling
+		tk->curTab->wantOffsetX = -1 * tk->width; // TODO: screen scaling
 	
 		tk->oldTab = tk->curTab;
 		tk->curTab = tk->curTab->prev;
 	
-		tk->curTab->offsetX = 480;
+		tk->curTab->offsetX = tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
 }
@@ -106,12 +109,12 @@ void r_tk_prev_tab(struct r_tk *tk)
 	if(tk->curTab != tk->curTab->next)
 	{
 		tk->curTab->offsetX = 0;
-		tk->curTab->wantOffsetX = 480;
+		tk->curTab->wantOffsetX = tk->width;
 
 		tk->oldTab = tk->curTab;	
 		tk->curTab = tk->curTab->next;
 	
-		tk->curTab->offsetX = -480;
+		tk->curTab->offsetX = -1 * tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
 }
@@ -288,6 +291,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	initialTab->btnTail = 0;
 	initialTab->hasButtons = 0;
 
+	SDL_GetWindowSize(*window, &tmp->width, &tmp->height);
+
 	return tmp;
 }
 
@@ -372,12 +377,12 @@ int r_tk_draw(struct r_tk *tk, int width)
 		SDL_Rect tabs;
 		tabs.x = 0;
 		tabs.y = 0;
-		tabs.w = width; // TODO: screen size scale
+		tabs.w = tk->width;
 		tabs.h = 26;
 
 		SDL_RenderSetViewport(tk->renderer, &tabs);
 		tmp = tk->tabTail;
-		int shouldScroll = tk->tabHead->rect.x + tk->tabHead->rect.w > 480; // FIXME
+		int shouldScroll = tk->tabHead->rect.x + tk->tabHead->rect.w > tk->width;
 		int maxScroll = tk->tabHead->rect.x + tk->tabHead->rect.w;
 		tk->tabWantOffsetX = tk->curTab->rect.x;
 		if (shouldScroll)
@@ -406,14 +411,14 @@ int r_tk_draw(struct r_tk *tk, int width)
 		SDL_Rect area;
 		area.x = 0;
 		area.y = 27;
-		area.w = width; // TODO: screen size scale
-		area.h = 320 - 27;
+		area.w = tk->width;
+		area.h = tk->height - 27;
 
 		SDL_RenderSetViewport(tk->renderer, &area);
 
 		// line separating tabs and other widgets
 		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
-		SDL_RenderDrawLine(tk->renderer, 0, 1, 480, 1);
+		SDL_RenderDrawLine(tk->renderer, 0, 1, tk->width, 1);
 		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 	}
 	// draw buttons
