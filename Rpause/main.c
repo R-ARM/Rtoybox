@@ -57,6 +57,17 @@ int getVolume()
 
 int getBrightness()
 {
+	FILE *curfd = fopen("/sys/class/backlight/intel_backlight/brightness", "r");
+	int cur = 0;
+	fscanf(curfd, "%d", &cur);
+	close(curfd);
+
+	FILE *maxfd = fopen("/sys/class/backlight/intel_backlight/max_brightness", "r");
+	int max = 0;
+	fscanf(maxfd, "%d", &max);
+	close(maxfd);
+
+	return cur * (100.0/max);
 }
 
 int getBatPercent()
@@ -73,11 +84,11 @@ int main(void)
 	toolkit->tabHead->scrolling = 0;
 
 	char volBuffer[5] = "    ";
-	char brBuffer[5] = "100%";
+	char brBuffer[5] = "    ";
 	char batBuffer[5] = "100%";
 
 	snprintf(volBuffer, 4, "%d%%", getVolume());
-	printf("%s\n", volBuffer);
+	snprintf(brBuffer, 4, "%d%%", getBrightness());
 
 	new_cotab(toolkit, toolkit->tabHead, 200);
 	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 5, " ", " ", volBuffer, brBuffer, batBuffer);
