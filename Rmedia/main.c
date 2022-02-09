@@ -58,7 +58,11 @@ int main(void)
 	char *nowPlaying;
 	DIR *d;
 	struct dirent *ent;
-	chdir("./music"); // TODO
+#ifdef ROS
+	chdir("/music/");
+#else
+	chdir("./music");
+#endif
 	d = opendir("./");
 	if(d)
 	{
