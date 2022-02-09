@@ -55,29 +55,26 @@ int getVolume()
 	}
 }
 
+int readIntFrom(char *path)
+{
+	FILE *fd = fopen(path, "r");
+	int tmp = 0;
+	fscanf(fd, "%d", &tmp);
+	close(fd);
+	return tmp;
+}
+
 int getBrightness()
 {
-	FILE *curfd = fopen("/sys/class/backlight/intel_backlight/brightness", "r");
-	int cur = 0;
-	fscanf(curfd, "%d", &cur);
-	close(curfd);
-
-	FILE *maxfd = fopen("/sys/class/backlight/intel_backlight/max_brightness", "r");
-	int max = 0;
-	fscanf(maxfd, "%d", &max);
-	close(maxfd);
+	int cur = readIntFrom("/sys/class/backlight/intel_backlight/brightness");
+	int max = readIntFrom("/sys/class/backlight/intel_backlight/max_brightness");
 
 	return cur * (100.0/max);
 }
 
 int getBatPercent()
 {
-	FILE *infd = fopen("/sys/class/power_supply/BAT0/capacity", "r");
-	int val = 0;
-	fscanf(infd, "%d", &val);
-	close(infd);
-
-	return val;
+	return readIntFrom("/sys/class/power_supply/BAT0/capacity");
 }
 
 int main(void)
