@@ -91,7 +91,9 @@ int getBrightness()
 int getBatPercent()
 {
 #ifdef ROS
-	return 50; // TODO
+	int cur = readIntFrom("/sys/class/power_supply/rk817-battery/charge_now");
+	int max = readintFrom("/sys/class/power_supply/rk817-battery/charge_full_design");
+	return cur * (100.0/max);
 #else
 	//return readIntFrom("/sys/class/power_supply/rk817-battery/capacity");
 #endif
