@@ -72,6 +72,12 @@ int getBrightness()
 
 int getBatPercent()
 {
+	FILE *infd = fopen("/sys/class/power_supply/BAT0/capacity", "r");
+	int val = 0;
+	fscanf(infd, "%d", &val);
+	close(infd);
+
+	return val;
 }
 
 int main(void)
@@ -85,10 +91,11 @@ int main(void)
 
 	char volBuffer[5] = "    ";
 	char brBuffer[5] = "    ";
-	char batBuffer[5] = "100%";
+	char batBuffer[5] = "    ";
 
 	snprintf(volBuffer, 4, "%d%%", getVolume());
 	snprintf(brBuffer, 4, "%d%%", getBrightness());
+	snprintf(batBuffer, 4, "%d%%", getBatPercent());
 
 	new_cotab(toolkit, toolkit->tabHead, 200);
 	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 5, " ", " ", volBuffer, brBuffer, batBuffer);
