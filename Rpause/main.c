@@ -11,15 +11,29 @@ TTF_Font *font;
 
 struct r_tk *toolkit;
 
+int readIntFrom(char *path)
+{
+	FILE *fd = fopen(path, "r");
+	int tmp = 0;
+	fscanf(fd, "%d", &tmp);
+	close(fd);
+	return tmp;
+}
+
+int pid;
+
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	struct btnData *tmp;
 	log_debug("button %s state %d\n", btn->name, btn->state);
 	if(strncmp(btn->name, "Resume", 4) == 0)
 	{
+		kill(pid, 18); // SIGCONT
 		exit(0);
 	} else if(strncmp(btn->name, "Exit", 4) == 0)
 	{
+		kill(pid, 2); // SIGINT
+		exit(0);
 		// kill game pid
 	}
 }
@@ -66,15 +80,6 @@ int getVolume()
 	}
 }
 
-int readIntFrom(char *path)
-{
-	FILE *fd = fopen(path, "r");
-	int tmp = 0;
-	fscanf(fd, "%d", &tmp);
-	close(fd);
-	return tmp;
-}
-
 int getBrightness()
 {
 	int cur = readIntFrom("/sys/class/backlight/backlight/brightness");
@@ -113,6 +118,9 @@ int main(void)
 	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 5, " ", " ", volBuffer, brBuffer, batBuffer);
 	toolkit->tabHead->coTab->isList = 1;
 	toolkit->tabHead->coTab->scrolling = 0;
+
+	pid = readIntFrom("/tmp/curpid");
+	kill(pid, 19); // SIGSTOP
 
 	SDL_Event event;
 	while (1)
