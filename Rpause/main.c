@@ -15,6 +15,13 @@ void buttonStateCallback(struct r_tk_btn *btn)
 {
 	struct btnData *tmp;
 	log_debug("button %s state %d\n", btn->name, btn->state);
+	if(strncmp(btn->name, "Resume", 4) == 0)
+	{
+		exit(0);
+	} else if(strncmp(btn->name, "Exit", 4) == 0)
+	{
+		// kill game pid
+	}
 }
 
 #define ACT_NEXT_BTN	1
