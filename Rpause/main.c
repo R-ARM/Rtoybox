@@ -3,6 +3,7 @@
 #include <tgmath.h>
 #include <dirent.h>
 #include <errno.h>
+#include <alsa/asoundlib.h>
 
 SDL_Renderer *renderer;
 SDL_Window *window;
@@ -39,6 +40,29 @@ int handle_input(int type, int code, int value)
 	return 0;
 }
 
+int getVolume()
+{
+	int pid = fork();
+	if(pid > 0)
+	{
+		int status;
+		waitpid(pid, &status, 0);
+		return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+	}
+	else
+	{
+		execl("./volhelper.sh", "./volhelper.sh", NULL);
+	}
+}
+
+int getBrightness()
+{
+}
+
+int getBatPercent()
+{
+}
+
 int main(void)
 {
 	r_init(&renderer, &window, &font, 0xff);
@@ -48,9 +72,12 @@ int main(void)
 	toolkit->tabHead->isList = 1;
 	toolkit->tabHead->scrolling = 0;
 
-	char volBuffer[5] = "100%";
+	char volBuffer[5] = "    ";
 	char brBuffer[5] = "100%";
 	char batBuffer[5] = "100%";
+
+	snprintf(volBuffer, 4, "%d%%", getVolume());
+	printf("%s\n", volBuffer);
 
 	new_cotab(toolkit, toolkit->tabHead, 200);
 	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 5, " ", " ", volBuffer, brBuffer, batBuffer);
