@@ -58,7 +58,11 @@ int getVolume()
 	}
 	else
 	{
+#ifdef ROS
+		execl("/bin/rpause-getvol", "/bin/rpause-getvol", NULL);
+#else
 		execl("./volhelper.sh", "./volhelper.sh", NULL);
+#endif
 	}
 }
 
@@ -73,15 +77,19 @@ int readIntFrom(char *path)
 
 int getBrightness()
 {
-	int cur = readIntFrom("/sys/class/backlight/intel_backlight/brightness");
-	int max = readIntFrom("/sys/class/backlight/intel_backlight/max_brightness");
+	int cur = readIntFrom("/sys/class/backlight/backlight/brightness");
+	int max = readIntFrom("/sys/class/backlight/backlight/max_brightness");
 
 	return cur * (100.0/max);
 }
 
 int getBatPercent()
 {
-	return readIntFrom("/sys/class/power_supply/BAT0/capacity");
+#ifdef ROS
+	return 50; // TODO
+#else
+	//return readIntFrom("/sys/class/power_supply/rk817-battery/capacity");
+#endif
 }
 
 int main(void)
