@@ -338,9 +338,9 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 
 	if(tab->coTab != 0)
 	{
-		tab->coTab->offsetX = tab->offsetX + 300;
+		tab->coTab->offsetX += tab->offsetX;
 		_draw_tab(tk, tab->coTab);
-		tab->coTab->offsetX = tab->offsetX;
+		tab->coTab->offsetX -= tab->offsetX;
 	}
 }
 
