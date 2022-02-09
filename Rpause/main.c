@@ -32,9 +32,9 @@ void buttonStateCallback(struct r_tk_btn *btn)
 		exit(0);
 	} else if(strncmp(btn->name, "Exit", 4) == 0)
 	{
+		kill(pid, 18); // SIGCONT
 		kill(pid, 2); // SIGINT
 		exit(0);
-		// kill game pid
 	}
 }
 
