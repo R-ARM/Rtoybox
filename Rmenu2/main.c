@@ -74,7 +74,7 @@ void buttonStateCallback(struct r_tk_btn *btn)
 				break;
 		}
 	}
-	else if(strncmp(btn->name, "Power Off", 9) == 0)
+	else if(strncmp(btn->name, "Power Off", 5) == 0)
 	{
 		log_debug("Powering Off!");
 #ifdef ROS
