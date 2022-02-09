@@ -257,6 +257,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->font = font;
 	tmp->btn_cb = cb;
 	tmp->lastBtnId = 0;
+	tmp->tabOffsetX = 0;
 
 	struct r_tk_tab *initialTab;
 	initialTab = malloc(sizeof(struct r_tk_tab));
