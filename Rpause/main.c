@@ -33,7 +33,7 @@ void buttonStateCallback(struct r_tk_btn *btn)
 	} else if(strncmp(btn->name, "Exit", 4) == 0)
 	{
 		kill(pid, 18); // SIGCONT
-		msleep(500);
+		//msleep(500);
 		kill(pid, 15); // SIGINT
 		exit(0);
 	}
