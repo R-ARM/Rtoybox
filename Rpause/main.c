@@ -1,0 +1,91 @@
+#include "../libragnarok.h"
+#include "../librtoolkit.h"
+#include <tgmath.h>
+#include <dirent.h>
+#include <errno.h>
+
+SDL_Renderer *renderer;
+SDL_Window *window;
+TTF_Font *font;
+
+struct r_tk *toolkit;
+
+void buttonStateCallback(struct r_tk_btn *btn)
+{
+	struct btnData *tmp;
+	log_debug("button %s state %d\n", btn->name, btn->state);
+}
+
+#define ACT_NEXT_BTN	1
+#define ACT_PREV_BTN	2
+#define ACT_ACT 	4
+
+int action = 0;
+int handle_input(int type, int code, int value)
+{
+	if(value != 1) return 0;
+	switch(code)
+	{
+		case BTN_DPAD_UP:
+			action = ACT_NEXT_BTN;
+			break;
+		case BTN_DPAD_DOWN:
+			action = ACT_PREV_BTN;
+			break;
+		case BTN_EAST:
+			action = ACT_ACT;
+			break;
+	}
+	return 0;
+}
+
+int main(void)
+{
+	r_init(&renderer, &window, &font, 0xff);
+	r_attach_input_callback(handle_input);
+	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
+	new_btn_list_batch(toolkit, toolkit->tabHead, 5, "Resume", "Exit", "Volume", "Brightness", "Battery");
+	toolkit->tabHead->isList = 1;
+	toolkit->tabHead->scrolling = 0;
+
+	char volBuffer[5] = "100%";
+	char brBuffer[5] = "100%";
+	char batBuffer[5] = "100%";
+
+	new_cotab(toolkit, toolkit->tabHead, 200);
+	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 5, " ", " ", volBuffer, brBuffer, batBuffer);
+	toolkit->tabHead->coTab->isList = 1;
+	toolkit->tabHead->coTab->scrolling = 0;
+
+	SDL_Event event;
+	while (1)
+	{
+		SDL_RenderClear(renderer);
+		r_tk_draw(toolkit, 480);
+		SDL_RenderPresent(renderer);
+
+		fflush(stdout);
+		switch(action)
+		{
+			case ACT_NEXT_BTN:
+				r_tk_next_btn(toolkit);
+				break;
+			case ACT_PREV_BTN:
+				r_tk_prev_btn(toolkit);
+				break;
+			case ACT_ACT:
+				r_tk_action(toolkit);
+				break;
+		}
+		action = 0;
+		while(SDL_PollEvent(&event) == 1)
+		{
+			switch(event.type)
+			{
+				case SDL_QUIT:
+					exit(0);
+					break;
+			}
+		}
+	}
+}
