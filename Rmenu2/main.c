@@ -29,7 +29,17 @@ void run_wait(char *path, char *arg1, char *arg2)
 	if(pidKaszojada > 0)
 	{
 		int status;
+		FILE *pidFile = fopen("/tmp/curpid", "w");
+		fprintf(pidFile, "%d", pidKaszojada);
+		fclose(pidFile);
+
 		waitpid(pidKaszojada, &status, 0);
+
+		// re-open and clear out
+		fopen("/tmp/curpid", "w");
+		fprintf(pidFile, "0");
+		fclose(fopen("/tmp/curPid", "w"));
+
 		r_flush_input_events();
 	}
 	else
