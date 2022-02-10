@@ -61,6 +61,15 @@ void buttonStateCallback(struct r_tk_btn *btn)
 	struct btnData *tmp;
 	log_debug("button %s state %d\n", btn->name, btn->state);
 	log_debug("prog data: %s\n", (char *)btn->progData);
+	if(strncmp(btn->name, "Power Off", 5) == 0)
+	{
+		log_debug("Powering Off!");
+#ifdef ROS
+		run_wait("/sbin/poweroff", "", "");
+#else
+		exit(0);
+#endif
+	}
 	if(btn->progData != NULL)
 	{
 		tmp = (struct btnData *)btn->progData;
@@ -73,15 +82,6 @@ void buttonStateCallback(struct r_tk_btn *btn)
 				run_wait(tmp->emu, tmp->path, tmp->arg);
 				break;
 		}
-	}
-	else if(strncmp(btn->name, "Power Off", 5) == 0)
-	{
-		log_debug("Powering Off!");
-#ifdef ROS
-		run_wait("/sbin/poweroff", "", "");
-#else
-		exit(0);
-#endif
 	}
 }
 
