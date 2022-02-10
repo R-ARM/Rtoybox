@@ -40,3 +40,9 @@ system MegaDrive
 ext md
 args __none__
 }
+{
+command /usr/bin/mednafen
+system MasterSystem
+ext sms
+args __none__
+}
