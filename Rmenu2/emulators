@@ -23,7 +23,7 @@ ext smc
 args __none__
 }
 {
-command /bin/PPSSPPSDL
+command /usr/bin/PPSSPPSDL
 system PSP
 ext iso
 args __none__
