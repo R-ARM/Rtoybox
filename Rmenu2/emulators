@@ -34,3 +34,9 @@ system PSP
 ext iso
 args __none__
 }
+{
+command /usr/bin/mednafen
+system MegaDrive
+ext md
+args __none__
+}
