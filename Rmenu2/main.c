@@ -232,17 +232,20 @@ int handle_input(int type, int code, int value)
 		case BTN_DPAD_DOWN:
 			action = ACT_PREV_BTN;
 			break;
-		case BTN_DPAD_RIGHT:
-		case BTN_DPAD_LEFT:
-			action = ACT_TOG_CTAB;
+//		case BTN_DPAD_RIGHT:
+//		case BTN_DPAD_LEFT:
+//			action = ACT_TOG_CTAB;
 			break;
 		case BTN_EAST:
+		case BTN_SOUTH:
 			action = ACT_ACT;
 			break;
 		case BTN_TR:
+		case BTN_DPAD_RIGHT:
 			action = ACT_NEXT_TAB;
 			break;
 		case BTN_TL:
+		case BTN_DPAD_LEFT:
 			action = ACT_PREV_TAB;
 	}
 	return 0;
