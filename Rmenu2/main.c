@@ -162,7 +162,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 	char fancyName[256];
 	char fullPath[256];
 #ifdef ROS
-	strcpy(temp, "/roms/");
+	strcpy(temp, "/data/roms/");
 #else
 	strcpy(temp, "./roms/");
 #endif
