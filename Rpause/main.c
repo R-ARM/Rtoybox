@@ -37,6 +37,7 @@ void buttonStateCallback(struct r_tk_btn *btn)
 		kill(pid, 15); // SIGINT
 		exit(0);
 	} else if(strncmp(btn->name, "Toggle FPS View", 4) == 0)
+	{
 		kill(pid, 10); // SIGUSR1
 		exit(0);
 	}
