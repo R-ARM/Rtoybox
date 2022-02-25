@@ -44,14 +44,13 @@ void run_wait(char *path, char *arg1, char *arg2)
 	}
 	else
 	{
-		char *env = {"GALLIUM_HUD=fps", "GALLIUM_HUD_TOGGLE_SIGNAL=10", NULL};
 		if(strlen(arg2) > 0)
-			execl(path, path, arg1, arg2, env);
+			execle(path, path, arg1, arg2, NULL);
 		else
 			if(strlen(arg1) > 0)			
-				execl(path, path, arg1, env);
+				execle(path, path, arg1);
 			else
-				execl(path, path, env);
+				execle(path, path, NULL);
 		log_err("Error running %s: %s\n", path, strerror(errno));
 		exit(1);
 	}
