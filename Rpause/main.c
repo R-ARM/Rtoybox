@@ -36,6 +36,9 @@ void buttonStateCallback(struct r_tk_btn *btn)
 		//msleep(500);
 		kill(pid, 15); // SIGINT
 		exit(0);
+	} else if(strncmp(btn->name, "Toggle FPS View", 4) == 0)
+		kill(pid, 10); // SIGUSR1
+		exit(0);
 	}
 }
 
@@ -105,7 +108,7 @@ int main(void)
 	r_init(&renderer, &window, &font, 0xff);
 	r_attach_input_callback(handle_input);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
-	new_btn_list_batch(toolkit, toolkit->tabHead, 4, "Resume", "Volume", "Brightness", "Battery");
+	new_btn_list_batch(toolkit, toolkit->tabHead, 4, "Resume", "Toggle FPS View", "Volume", "Brightness", "Battery");
 	toolkit->tabHead->isList = 1;
 	toolkit->tabHead->scrolling = 0;
 
@@ -118,7 +121,7 @@ int main(void)
 	snprintf(batBuffer, 4, "%d%%", getBatPercent());
 
 	new_cotab(toolkit, toolkit->tabHead, 200);
-	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, " ", volBuffer, brBuffer, batBuffer);
+	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, " ", " ", volBuffer, brBuffer, batBuffer);
 	toolkit->tabHead->coTab->isList = 1;
 	toolkit->tabHead->coTab->scrolling = 0;
 
