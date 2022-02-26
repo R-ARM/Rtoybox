@@ -44,6 +44,10 @@ void run_wait(char *path, char *arg1, char *arg2)
 	}
 	else
 	{
+		setenv("GALLIUM_HUD", "fps", 1);
+		setenv("GALLIUM_HUD_TOGGLE_SIGNAL", "10", 1);
+		setenv("GALLIUM_HUD_VISIBLE", "false", 1);
+
 		if(strlen(arg2) > 0)
 			execl(path, path, arg1, arg2, NULL);
 		else
