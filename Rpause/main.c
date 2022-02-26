@@ -110,7 +110,7 @@ int main(void)
 	r_init(&renderer, &window, &font, 0xff);
 	r_attach_input_callback(handle_input);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
-	new_btn_list_batch(toolkit, toolkit->tabHead, 4, "Resume", "Toggle FPS View", "Volume", "Brightness", "Battery");
+	new_btn_list_batch(toolkit, toolkit->tabHead, 5, "Resume", "Toggle FPS View", "Volume", "Brightness", "Battery");
 	toolkit->tabHead->isList = 1;
 	toolkit->tabHead->scrolling = 0;
 
