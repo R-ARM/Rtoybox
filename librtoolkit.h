@@ -87,6 +87,7 @@ struct r_tk
 	struct r_tk_tab *tabHead;
 	struct r_tk_tab *tabTail;
 };
+struct r_tk *_r_glob_toolkit;
 
 // yes, those ARE internally reversed
 void r_tk_next_tab(struct r_tk *tk)
@@ -293,6 +294,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 	SDL_GetWindowSize(*window, &tmp->width, &tmp->height);
 
+	_r_glob_toolkit = tmp;
 	return tmp;
 }
 
@@ -359,6 +361,42 @@ void r_tk_action(struct r_tk *tk)
 		tmp = tk->curTab->curBtn;
 	if(tmp != NULL && tmp != 0)
 		tk->btn_cb(tmp);
+}
+
+int _r_tk_input_handler(int type, int code, int value)
+{
+	if(value != 1) goto out;
+	struct r_tk *toolkit = _r_glob_toolkit; // :( ugly
+
+	// semaphores maybe???
+	switch(code)
+	{
+		case BTN_DPAD_UP:
+			r_tk_next_btn(toolkit);
+			break;
+		case BTN_DPAD_DOWN:
+			r_tk_prev_btn(toolkit);
+			break;
+		case BTN_DPAD_LEFT:
+		case BTN_DPAD_RIGHT:
+			r_tk_toggle_cotab(toolkit);
+			break;
+		case BTN_EAST:
+		case BTN_SOUTH:
+			r_tk_action(toolkit);
+			break;
+		case BTN_TR:
+			r_tk_next_tab(toolkit);
+			break;
+		case BTN_TL:
+			r_tk_prev_tab(toolkit);
+			break;
+	}
+
+	return 0;
+
+	out:
+	//return _r_tk_prog_input(type, code, value); // maybe in future?
 }
 
 int r_tk_draw(struct r_tk *tk, int width)

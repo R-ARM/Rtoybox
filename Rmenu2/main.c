@@ -216,50 +216,12 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 		log_debug("Found %d roms for %s\n", i, system);
 }
 
-int action = 0;
-
-#define ACT_NEXT_BTN	1
-#define ACT_PREV_BTN	2
-#define ACT_TOG_CTAB	3
-#define ACT_ACT 	4
-#define ACT_NEXT_TAB	5
-#define ACT_PREV_TAB	6
-
-int handle_input(int type, int code, int value)
-{
-	if(value != 1) return 0;
-	switch(code)
-	{
-		case BTN_DPAD_UP:
-			action = ACT_NEXT_BTN;
-			break;
-		case BTN_DPAD_DOWN:
-			action = ACT_PREV_BTN;
-			break;
-//		case BTN_DPAD_RIGHT:
-//		case BTN_DPAD_LEFT:
-//			action = ACT_TOG_CTAB;
-			break;
-		case BTN_EAST:
-		case BTN_SOUTH:
-			action = ACT_ACT;
-			break;
-		case BTN_TR:
-		case BTN_DPAD_RIGHT:
-			action = ACT_NEXT_TAB;
-			break;
-		case BTN_TL:
-		case BTN_DPAD_LEFT:
-			action = ACT_PREV_TAB;
-	}
-	return 0;
-}
-
 int main(void)
 {
 	r_init(&renderer, &window, &font, 0xff);
-	r_attach_input_callback(handle_input);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
+
+	r_attach_input_callback(_r_tk_input_handler);
 	new_btn_list_batch(toolkit, toolkit->tabHead, 3, "Power Off", "Update", "USB Mode");
 	toolkit->tabHead->isList = 1;
 
@@ -282,28 +244,6 @@ int main(void)
 		SDL_RenderPresent(renderer);
 
 		fflush(stdout);
-		switch(action)
-		{
-			case ACT_NEXT_BTN:
-				r_tk_next_btn(toolkit);
-				break;
-			case ACT_PREV_BTN:
-				r_tk_prev_btn(toolkit);
-				break;
-			case ACT_TOG_CTAB:
-				r_tk_toggle_cotab(toolkit);
-				break;
-			case ACT_ACT:
-				r_tk_action(toolkit);
-				break;
-			case ACT_NEXT_TAB:
-				r_tk_next_tab(toolkit);
-				break;
-			case ACT_PREV_TAB:
-				r_tk_prev_tab(toolkit);
-				break;
-		}
-		action = 0;
 		while(SDL_PollEvent(&event) == 1)
 		{
 			switch(event.type)
