@@ -234,7 +234,6 @@ int main(void)
 	toolkit->tabHead->isList = 1;
 
 	loadEmulators(toolkit);
-	//loadRomList(toolkit, "gba", "mgba", "GBA");
 	
 	SDL_Event event;
 	while (1)
