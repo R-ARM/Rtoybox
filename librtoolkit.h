@@ -1,4 +1,5 @@
 #include <tgmath.h>
+#include <semaphore.h>
 
 void get_text_and_rect(SDL_Renderer *renderer, char *text,
 	TTF_Font *font, SDL_Texture **texture, SDL_Rect *rect, int r, int g, int b)
@@ -80,6 +81,8 @@ struct r_tk
 	int previngTabs;
 	int nextingTabs;
 	int lastBtnId;
+
+	sem_t draw_done_sem;
 
 	struct r_tk_tab *oldTab;
 	struct r_tk_tab *curTab;
@@ -294,6 +297,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 
 	SDL_GetWindowSize(*window, &tmp->width, &tmp->height);
 
+	sem_init(&tmp->draw_done_sem, 0, 1);
+
 	_r_glob_toolkit = tmp;
 	return tmp;
 }
@@ -368,6 +373,7 @@ int _r_tk_input_handler(int type, int code, int value)
 	if(value != 1) goto out;
 	struct r_tk *toolkit = _r_glob_toolkit; // :( ugly
 
+	sem_wait(&toolkit->draw_done_sem);
 	// semaphores maybe???
 	switch(code)
 	{
@@ -494,4 +500,5 @@ int r_tk_draw(struct r_tk *tk, int width)
 			tk->oldTab = NULL;
 	}
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
+	sem_post(&tk->draw_done_sem);
 }
