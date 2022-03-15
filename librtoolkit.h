@@ -69,19 +69,13 @@ struct r_tk
 
 	void (*btn_cb)(struct r_tk_btn*);
 
-	int winX;
-	int winY;
-
 	int width;
 	int height;
 
 	int tabOffsetX;
 	int tabWantOffsetX;
 
-	int previngTabs;
-	int nextingTabs;
 	int lastBtnId;
-
 	int fontsize;
 
 	sem_t draw_done_sem;
