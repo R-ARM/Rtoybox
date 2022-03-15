@@ -218,7 +218,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff);
+	r_init(&renderer, &window, &font, 0xff, 24);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
 
 	r_attach_input_callback(_r_tk_input_handler);

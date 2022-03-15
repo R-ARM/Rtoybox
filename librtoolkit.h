@@ -82,6 +82,8 @@ struct r_tk
 	int nextingTabs;
 	int lastBtnId;
 
+	int fontsize;
+
 	sem_t draw_done_sem;
 
 	struct r_tk_tab *oldTab;
@@ -290,6 +292,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->previngTabs = 0;
 	tmp->nextingTabs = 0;
 
+	tmp->fontsize = _fontsize; // XXX: global
+
 	initialTab->btnHead = 0;
 	initialTab->curBtn = 0;
 	initialTab->btnTail = 0;
@@ -321,12 +325,12 @@ void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 		if(tab->isList == 1)
 		{
 			tmpBtn->rect.x = 0 + tab->offsetX;
-			tmpBtn->rect.y = 25 * i - fmax(tab->offsetY, 0);
+			tmpBtn->rect.y = (tk->fontsize + 1) * i - fmax(tab->offsetY, 0);
 
 			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
 
 			tmpBtn->rect.x = 0;
-			tmpBtn->rect.y = 25 * i;
+			tmpBtn->rect.y = (tk->fontsize + 1) * i;
 		}
 		else
 		{
@@ -422,7 +426,7 @@ int r_tk_draw(struct r_tk *tk, int width)
 		tabs.x = 0;
 		tabs.y = 0;
 		tabs.w = tk->width;
-		tabs.h = 26;
+		tabs.h = tk->fontsize + 2;
 
 		SDL_RenderSetViewport(tk->renderer, &tabs);
 		tmp = tk->tabTail;
@@ -454,9 +458,9 @@ int r_tk_draw(struct r_tk *tk, int width)
 
 		SDL_Rect area;
 		area.x = 0;
-		area.y = 27;
+		area.y = tk->fontsize + 3;
 		area.w = tk->width;
-		area.h = tk->height - 27;
+		area.h = tk->height - (tk->fontsize + 3);
 
 		SDL_RenderSetViewport(tk->renderer, &area);
 
@@ -475,13 +479,13 @@ int r_tk_draw(struct r_tk *tk, int width)
 	{
 		if(tk->curTab->scrolling == 1)
 		{
-			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - 25; // TODO: scale
+			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - tk->fontsize - 1;
 			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
 				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
 		}
 		if(tk->curTab->coTab != 0 && tk->curTab->coTab->scrolling == 1)
 		{
-			tk->curTab->coTab->wantOffsetY = tk->curTab->coTab->curBtn->rect.y - 25;
+			tk->curTab->coTab->wantOffsetY = tk->curTab->coTab->curBtn->rect.y - tk->fontsize - 1;
 			if(tk->curTab->coTab->wantOffsetY != tk->curTab->coTab->offsetY)
 				tk->curTab->coTab->offsetY += (tk->curTab->coTab->wantOffsetY - tk->curTab->coTab->offsetY)/2;
 		}

@@ -51,7 +51,7 @@ static gboolean load_new (GstElement * playbin, gpointer udata)
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff);
+	r_init(&renderer, &window, &font, 0xff, 24);
 	toolkit = new_r_tk(&window, &renderer, &font, "Tracks", buttonStateCallback);
 	md = new_rm();
 	srand(time(0));
