@@ -394,7 +394,7 @@ int r_tk_draw(struct r_tk *tk, int width)
 		tabs.x = 0;
 		tabs.y = 0;
 		tabs.w = tk->width;
-		tabs.h = tk->fontsize + 2;
+		tabs.h = tk->tabHead->rect.h;
 
 		SDL_RenderSetViewport(tk->renderer, &tabs);
 		tmp = tk->tabTail;
@@ -426,9 +426,9 @@ int r_tk_draw(struct r_tk *tk, int width)
 
 		SDL_Rect area;
 		area.x = 0;
-		area.y = tk->fontsize + 3;
+		area.y = tk->tabHead->rect.h + 1;
 		area.w = tk->width;
-		area.h = tk->height - (tk->fontsize + 3);
+		area.h = tk->height - (tk->tabHead->rect.h + 1);
 
 		SDL_RenderSetViewport(tk->renderer, &area);
 
