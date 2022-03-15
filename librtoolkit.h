@@ -163,18 +163,13 @@ struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 {
 	struct r_tk_tab *tmp;
 
-	tmp = malloc(sizeof(struct r_tk_tab));
+	tmp = calloc(1, sizeof(struct r_tk_tab));
 
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
 	strncpy(tmp->name, name, 254);
 
 	tmp->id = tk->tabHead->id + 1;
-	tmp->hasButtons = 0;
 
-	tmp->offsetY = 0;
-	tmp->wantOffsetY = 0;
-	tmp->offsetX = 0;
-	tmp->wantOffsetX = 0;
 	tmp->scrolling = 1;
 
 	return tmp;
@@ -208,7 +203,7 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 {
 	struct r_tk_btn *tmp;
 
-	tmp = malloc(sizeof(struct r_tk_btn));
+	tmp = calloc(1, sizeof(struct r_tk_btn));
 
 	get_text_and_rect(tk->renderer, name, *tk->font, &tmp->text, &tmp->rect, 255, 255, 255);
 	strncpy(tmp->name, name, 254);
@@ -216,7 +211,6 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tmp->id = tk->lastBtnId++;
 	tmp->rect.x = x;
 	tmp->rect.y = y;
-	tmp->state = 0;
 
 	if(tab->btnHead == NULL || tab->hasButtons == 0)
 	{
@@ -231,9 +225,6 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	}
 
 	tab->btnTail = tmp;
-
-	tab->btnHead->prev = 0;
-	tab->btnTail->next = 0;
 
 	tab->hasButtons = 1;
 
@@ -260,26 +251,17 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 {
 	struct r_tk *tmp;
 
-	tmp = malloc(sizeof(struct r_tk));
+	tmp = calloc(1, sizeof(struct r_tk));
 	tmp->window = window;
 	tmp->renderer = *renderer;
 	tmp->font = font;
 	tmp->btn_cb = cb;
-	tmp->lastBtnId = 0;
-	tmp->tabOffsetX = 0;
 
 	struct r_tk_tab *initialTab;
-	initialTab = malloc(sizeof(struct r_tk_tab));
-	initialTab->id = 0;
+	initialTab = calloc(1, sizeof(struct r_tk_tab));
 	initialTab->next = initialTab;
 	initialTab->prev = initialTab;
-	initialTab->offsetX = 0;
-	initialTab->offsetY = 0;
-	initialTab->wantOffsetX = 0;
-	initialTab->wantOffsetY = 0;
 	initialTab->scrolling = 1;
-	initialTab->coTab = 0;
-	initialTab->coTabAct = 0;
 	strncpy(initialTab->name, initTabName, 254);
 
 	get_text_and_rect(*renderer, initTabName, *font, &initialTab->text, &initialTab->rect, 255, 255, 255);
@@ -289,15 +271,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->curTab = initialTab;
 	tmp->oldTab = NULL;
 
-	tmp->previngTabs = 0;
-	tmp->nextingTabs = 0;
-
 	tmp->fontsize = _fontsize; // XXX: global
-
-	initialTab->btnHead = 0;
-	initialTab->curBtn = 0;
-	initialTab->btnTail = 0;
-	initialTab->hasButtons = 0;
 
 	SDL_GetWindowSize(*window, &tmp->width, &tmp->height);
 
