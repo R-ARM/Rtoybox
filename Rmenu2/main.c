@@ -147,12 +147,12 @@ int loadEmulators(struct r_tk *tk)
 		log_err("Failed to open emulator config file\n");
 		return 1;
 	}
-	while(1)
+	while(feof(emus) == 0)
 	{
 		while(!next)
 		{
 			fgets(tmp, 256, emus);
-			tmp[strcspn(tmp, "\n")] = '\0'; // snip away newline
+			tmp[strcspn(tmp, "\n")] = '\0';
 			if(strncmp("command", tmp, 7) == 0)
 				strncpy(cmd, tmp+8, 255-7);
 			else if(strncmp("system", tmp, 6) == 0)
@@ -171,9 +171,6 @@ int loadEmulators(struct r_tk *tk)
 			args[0] = '\0';
 		log_debug("Got config entry: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
 		loadRomList(tk, ext, cmd, system, args);
-		
-		if(feof(emus) != 0)
-			break;
 	}
 }
 
