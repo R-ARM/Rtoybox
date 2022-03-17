@@ -152,7 +152,7 @@ int loadEmulators(struct r_tk *tk)
 		while(!next)
 		{
 			fgets(tmp, 256, emus);
-			tmp[strcspn(tmp, "\n")] = '\0';
+			tmp[strcspn(tmp, "\n")] = '\0'; // snip away newline
 			if(strncmp("command", tmp, 7) == 0)
 				strncpy(cmd, tmp+8, 255-7);
 			else if(strncmp("system", tmp, 6) == 0)
