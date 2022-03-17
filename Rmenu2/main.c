@@ -128,11 +128,11 @@ int loadPackageData(struct r_tk *tk)
 
 int loadEmulators(struct r_tk *tk)
 {
-	char cmd[256];
-	char system[256];
-	char args[256];
-	char ext[256];
-	char tmp[256];
+	char cmd[256] = "";
+	char system[256] = "";
+	char args[256] = "";
+	char ext[256] = "";
+	char tmp[256] = "";
 	uint8_t next = 0;
 
 	log_debug("Loading emulator config file\n");
