@@ -150,7 +150,8 @@ int loadEmulators(struct r_tk *tk)
 	{
 		while(1)
 		{
-			fgets(tmp, 256, emus);
+			if(fgets(tmp, 256, emus) == NULL)
+				return 0;
 			tmp[strcspn(tmp, "\n")] = '\0';
 			if(strncmp("command", tmp, 7) == 0)
 				strncpy(cmd, &tmp[8], 255-7);
