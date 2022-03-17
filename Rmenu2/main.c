@@ -133,7 +133,6 @@ int loadEmulators(struct r_tk *tk)
 	char args[256] = "";
 	char ext[256] = "";
 	char tmp[256] = "";
-	uint8_t next = 0;
 
 	log_debug("Loading emulator config file\n");
 
@@ -149,7 +148,7 @@ int loadEmulators(struct r_tk *tk)
 	}
 	while(feof(emus) == 0)
 	{
-		while(!next)
+		while(1)
 		{
 			fgets(tmp, 256, emus);
 			tmp[strcspn(tmp, "\n")] = '\0';
@@ -162,11 +161,10 @@ int loadEmulators(struct r_tk *tk)
 			else if(strncmp("args", tmp, 4) == 0)
 				strncpy(args, tmp+5, 255-4);
 			else if(strncmp("next", tmp, 4) == 0)
-				next = !next;
+				break;
 			else
 				log_err("Malformed option \"%s\"\n", tmp);
 		}
-		next = 0;
 		log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\"\n", cmd, system, ext, args);
 		loadRomList(tk, ext, cmd, system, args);
 	}
