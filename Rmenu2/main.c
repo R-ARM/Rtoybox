@@ -167,8 +167,6 @@ int loadEmulators(struct r_tk *tk)
 				log_err("Malformed option \"%s\"\n", tmp);
 		}
 		next = 0;
-		if(strncmp("__none__", args, 8) == 0)
-			args[0] = '\0';
 		log_debug("Got config entry: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
 		loadRomList(tk, ext, cmd, system, args);
 	}
