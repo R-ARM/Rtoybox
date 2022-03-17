@@ -1,45 +1,32 @@
 command /usr/bin/mednafen
 system GBA
 ext gba
-args __none__
 next
 command /usr/bin/mednafen
 system GB
 ext gb
-args __none__
 next
 command /usr/bin/mednafen
 system NES
 ext nes
-args __none__
 next
-
 command /usr/bin/mednafen
 system SNES
 ext smc
-args __none__
 next
-
 command /usr/bin/mednafen
 system PS1
 ext iso
-args __none__
 next
-
 command /usr/bin/PPSSPPSDL
 system PSP
 ext iso
-args __none__
 next
-
 command /usr/bin/mednafen
-system MegaDrive
+system Mega Drive
 ext md
-args __none__
 next
-
 command /usr/bin/mednafen
-system MasterSystem
+system Master System
 ext sms
-args __none__
 next
