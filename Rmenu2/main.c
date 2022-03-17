@@ -180,23 +180,22 @@ int loadEmulators(struct r_tk *tk)
 
 int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 {
-	char temp[256] = "";
+	char romdir[256] = "";
 	char fancyName[256] = "";
-	char fullPath[256] = "";
 #ifdef ROS
-	strcpy(temp, "/data/roms/");
+	strcpy(romdir, "/data/roms/");
 #else
-	strcpy(temp, "./roms/");
+	strcpy(romdir, "./roms/");
 #endif
-	strcat(temp, system);
-	strcat(temp, "/");
-	log_debug("Looking for %s roms in %s\n", system, temp);
+	strcat(romdir, system);
+	strcat(romdir, "/");
+	log_debug("Looking for %s roms in %s\n", system, romdir);
 	int i = 0;
 
 	struct btnData *tmp;
 	DIR *d;
 	struct dirent *ent;
-	d = opendir(temp);
+	d = opendir(romdir);
 	if(d)
 	{
 		while((ent = readdir(d)) != NULL)
@@ -210,9 +209,8 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 				tmp = malloc(sizeof(struct btnData));
 				tmp->type = rom;
 				strcpy(tmp->emu, emu);
-				strcpy(fullPath, temp);
 				strcpy(tmp->arg, args);
-				strcpy(tmp->path, strcat(fullPath, ent->d_name));
+				strcpy(tmp->path, strcat(romdir, ent->d_name));
 				tk->tabHead->btnTail->progData = tmp;
 				i++;
 			}
@@ -221,11 +219,11 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 	}
 	else
 	{
-		log_warn("Failed opening %s directory\n", temp);
+		log_warn("Failed opening %s directory\n", romdir);
 		return 1;
 	}
 	if(i == 0)
-		log_debug("No %s roms found in %s\n", system, temp);
+		log_debug("No %s roms found in %s\n", system, romdir);
 	else
 		log_debug("Found %d roms for %s\n", i, system);
 }
