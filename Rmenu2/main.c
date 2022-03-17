@@ -153,13 +153,13 @@ int loadEmulators(struct r_tk *tk)
 			fgets(tmp, 256, emus);
 			tmp[strcspn(tmp, "\n")] = '\0';
 			if(strncmp("command", tmp, 7) == 0)
-				strncpy(cmd, tmp+8, 255-7);
+				strncpy(cmd, &tmp[8], 255-7);
 			else if(strncmp("system", tmp, 6) == 0)
-				strncpy(system, tmp+7, 255-6);
+				strncpy(system, &tmp[7], 255-6);
 			else if(strncmp("ext", tmp, 3) == 0)
-				strncpy(ext, tmp+4, 255-3);
+				strncpy(ext, &tmp[4], 255-3);
 			else if(strncmp("args", tmp, 4) == 0)
-				strncpy(args, tmp+5, 255-4);
+				strncpy(args, &tmp[5], 255-4);
 			else if(strncmp("next", tmp, 4) == 0)
 				break;
 			else
