@@ -132,6 +132,8 @@ int loadEmulators(struct r_tk *tk)
 	char system[256];
 	char args[256];
 	char ext[256];
+	char tmp[256];
+	uint8_t next = 0;
 
 	log_debug("Loading emulator config file\n");
 
@@ -147,8 +149,24 @@ int loadEmulators(struct r_tk *tk)
 	}
 	while(1)
 	{
-		fscanf(emus, "{\ncommand %s\nsystem %s\next %s\nargs %s\n}\n", cmd, system, ext, args);
-
+		while(!next)
+		{
+			fscanf(emus, "%s", tmp);
+			if(strncmp("command", tmp, 7) == 0)
+				fscanf(emus, "%s", cmd);
+			else if(strncmp("system", tmp, 6) == 0)
+				fscanf(emus, "%s", system);
+			else if(strncmp("ext", tmp, 3) == 0)
+				fscanf(emus, "%s", ext);
+			else if(strncmp("args", tmp, 4) == 0)
+				fscanf(emus, "%s", args);
+			else if(strncmp("next", tmp, 4) == 0)
+				goto out;
+			else
+				log_err("Malformed option \"%s\"\n", tmp);
+		}
+		out:
+		next = 0;
 		if(strncmp("__none__", args, 8) == 0)
 			args[0] = '\0';
 		log_debug("Got config entry: command %s, system %s, ext %s, args %s\n", cmd, system, ext, args);
@@ -218,7 +236,7 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff, 24);
+	r_init(&renderer, &window, &font, 0xff, 26);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
 
 	r_attach_input_callback(_r_tk_input_handler);
