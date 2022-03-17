@@ -14,10 +14,10 @@ enum btnType{rom, prog, special};
 
 struct btnData
 {
-	enum btnType type;
 	char emu[256];
-	char path[256];
 	char arg[256];
+	char path[256];
+	enum btnType type;
 };
 
 void run_wait(char *path, char *arg1, char *arg2)
