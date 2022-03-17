@@ -148,6 +148,10 @@ int loadEmulators(struct r_tk *tk)
 	}
 	while(feof(emus) == 0)
 	{
+		strcpy(cmd, "");
+		strcpy(system, "");
+		strcpy(args, "");
+		strcpy(ext, "");
 		while(1)
 		{
 			if(fgets(tmp, 256, emus) == NULL)
