@@ -20,6 +20,7 @@ struct btnData
 	enum btnType type;
 };
 
+// TODO: make variadic
 void run_wait(char *path, char *arg1, char *arg2)
 {
 	pid_t pidKaszojada;
@@ -63,8 +64,6 @@ void run_wait(char *path, char *arg1, char *arg2)
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	struct btnData *tmp;
-	log_debug("button %s state %d\n", btn->name, btn->state);
-	log_debug("prog data: %s\n", (char *)btn->progData);
 	if(strncmp(btn->name, "Power Off", 5) == 0)
 	{
 		log_debug("Powering Off!");
