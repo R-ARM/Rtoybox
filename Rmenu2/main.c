@@ -161,7 +161,9 @@ int loadEmulators(struct r_tk *tk)
 				strncpy(ext, &tmp[4], 255-3);
 			else if(strncmp("args", tmp, 4) == 0)
 				strncpy(args, &tmp[5], 255-4);
-			else if(strncmp("next", tmp, 4) == 0)
+			else if(strncmp("{", tmp, 1) == 0)
+				continue;
+			else if(strncmp("}", tmp, 1) == 0)
 				break;
 			else
 				log_err("Malformed option \"%s\"\n", tmp);

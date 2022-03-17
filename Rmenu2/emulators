@@ -1,32 +1,40 @@
+{
 command /usr/bin/mednafen
 system GBA
 ext gba
-next
+}
+{
 command /usr/bin/mednafen
 system GB
 ext gb
-next
+}
+{
 command /usr/bin/mednafen
 system NES
 ext nes
-next
+}
+{
 command /usr/bin/mednafen
 system SNES
 ext smc
-next
+}
+{
 command /usr/bin/mednafen
 system PS1
 ext iso
-next
+}
+{
 command /usr/bin/PPSSPPSDL
 system PSP
 ext iso
-next
+}
+{
 command /usr/bin/mednafen
 system Mega Drive
 ext md
-next
+}
+{
 command /usr/bin/mednafen
 system Master System
 ext sms
-next
+}
