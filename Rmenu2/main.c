@@ -147,32 +147,30 @@ int loadEmulators(struct r_tk *tk)
 	}
 	while(feof(emus) == 0)
 	{
-		strcpy(cmd, "");
-		strcpy(system, "");
-		strcpy(args, "");
-		strcpy(ext, "");
-		while(1)
+		fgets(tmp, 256, emus);
+		tmp[strcspn(tmp, "\n")] = '\0';
+		tmp[strcspn(tmp, "]")] = '\0';
+
+		if(strncmp("[", tmp, 1) == 0)
 		{
-			if(fgets(tmp, 256, emus) == NULL)
-				return 0;
-			tmp[strcspn(tmp, "\n")] = '\0';
-			if(strncmp("command", tmp, 7) == 0)
-				strncpy(cmd, &tmp[8], 255-7);
-			else if(strncmp("system", tmp, 6) == 0)
-				strncpy(system, &tmp[7], 255-6);
-			else if(strncmp("ext", tmp, 3) == 0)
-				strncpy(ext, &tmp[4], 255-3);
-			else if(strncmp("args", tmp, 4) == 0)
-				strncpy(args, &tmp[5], 255-4);
-			else if(strncmp("{", tmp, 1) == 0)
-				continue;
-			else if(strncmp("}", tmp, 1) == 0)
-				break;
-			else
-				log_err("Malformed option \"%s\"\n", tmp);
+			log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\"\n", cmd, system, ext, args);
+			loadRomList(tk, ext, cmd, system, args);
+			strncpy(system, &tmp[1], 255-2);
+
+			strcpy(cmd, "");
+			strcpy(args, "");
+			strcpy(ext, "");
 		}
-		log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\"\n", cmd, system, ext, args);
-		loadRomList(tk, ext, cmd, system, args);
+		else if(strncmp("command", tmp, 7) == 0)
+			strncpy(cmd, &tmp[8], 255-7);
+		else if(strncmp("ext", tmp, 3) == 0)
+			strncpy(ext, &tmp[4], 255-3);
+		else if(strncmp("args", tmp, 4) == 0)
+			strncpy(args, &tmp[5], 255-4);
+		else if(strlen(tmp) == 0)
+			continue; // ignore empty lines
+		else
+			log_err("Malformed option \"%s\"\n", tmp);
 	}
 }
 
