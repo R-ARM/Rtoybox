@@ -167,9 +167,7 @@ int loadEmulators(struct r_tk *tk)
 			strncpy(ext, &tmp[4], 255-3);
 		else if(strncmp("args", tmp, 4) == 0)
 			strncpy(args, &tmp[5], 255-4);
-		else if(strlen(tmp) == 0)
-			continue; // ignore empty lines
-		else
+		else if(strlen(tmp) != 0) // ignore empty lines
 			log_err("Malformed option \"%s\"\n", tmp);
 	}
 }
