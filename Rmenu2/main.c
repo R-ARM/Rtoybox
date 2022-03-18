@@ -148,16 +148,16 @@ int loadEmulators(struct r_tk *tk)
 	while(feof(emus) == 0)
 	{
 		fgets(tmp, 256, emus);
-		tmp[strcspn(tmp, "\n")] = '\0';
-		tmp[strcspn(tmp, "]")] = '\0';
+		tmp[strcspn(tmp, "\n")] = '\0';	// get rid of newline at the end
+		tmp[strcspn(tmp, "]")] = '\0';	// and of the system name end marker
 
 		if(strncmp("[", tmp, 1) == 0)
 		{
 			log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\"\n", cmd, system, ext, args);
-			loadRomList(tk, ext, cmd, system, args);
+			loadRomList(tk, ext, cmd, system, args);	// TODO: thread out
 			strncpy(system, &tmp[1], 255-2);
 
-			strcpy(cmd, "");
+			strcpy(cmd, "");	// don't carry over old values
 			strcpy(args, "");
 			strcpy(ext, "");
 		}
@@ -167,7 +167,7 @@ int loadEmulators(struct r_tk *tk)
 			strncpy(ext, &tmp[4], 255-3);
 		else if(strncmp("args", tmp, 4) == 0)
 			strncpy(args, &tmp[5], 255-4);
-		else if(strlen(tmp) != 0) // ignore empty lines
+		else if(strlen(tmp) != 0)	// ignore empty lines
 			log_err("Malformed option \"%s\"\n", tmp);
 	}
 }
