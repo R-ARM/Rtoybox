@@ -133,6 +133,7 @@ struct emulator {
 	char* args;
 };
 
+void* loadRomList(void *arg);
 int loadEmulators(struct r_tk *tk)
 {
 	char cmd[256] = "";
@@ -188,8 +189,9 @@ int loadEmulators(struct r_tk *tk)
 }
 
 
-int loadRomList(struct emulator *input)
+void* loadRomList(void *arg)
 {
+	struct emulator *input = (struct emulator *)arg;
 	char romdir[256] = "";
 	char fancyName[256] = "";
 #ifdef ROS
@@ -228,11 +230,7 @@ int loadRomList(struct emulator *input)
 		input->tk->tabHead->isList = 1;
 	}
 	else
-	{
 		log_warn("Failed opening %s directory\n", romdir);
-		free(input);
-		return 1;
-	}
 	if(i == 0)
 		log_debug("No %s roms found in %s\n", input->system, romdir);
 	else
