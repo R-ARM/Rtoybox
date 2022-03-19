@@ -125,6 +125,14 @@ int loadPackageData(struct r_tk *tk)
 {
 }
 
+struct emulator {
+	struct r_tk *tk;
+	char* ext;
+	char* cmd;
+	char* system;
+	char* args;
+};
+
 int loadEmulators(struct r_tk *tk)
 {
 	char cmd[256] = "";
@@ -132,6 +140,7 @@ int loadEmulators(struct r_tk *tk)
 	char args[256] = "";
 	char ext[256] = "";
 	char tmp[256] = "";
+	struct emulator *emu_tmp;
 
 	log_debug("Loading emulator config file\n");
 
@@ -154,7 +163,13 @@ int loadEmulators(struct r_tk *tk)
 		if(strncmp("[", tmp, 1) == 0)
 		{
 			log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\"\n", cmd, system, ext, args);
-			loadRomList(tk, ext, cmd, system, args);	// TODO: thread out
+			emu_tmp = malloc(sizeof(struct emulator));
+			emu_tmp->tk = tk;
+			emu_tmp->ext = ext;
+			emu_tmp->cmd = cmd;
+			emu_tmp->system = system;
+			emu_tmp->args = args;
+			loadRomList(emu_tmp);
 			strncpy(system, &tmp[1], 255-2);
 
 			strcpy(cmd, "");	// don't carry over old values
@@ -173,7 +188,7 @@ int loadEmulators(struct r_tk *tk)
 }
 
 
-int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
+int loadRomList(struct emulator *input)
 {
 	char romdir[256] = "";
 	char fancyName[256] = "";
@@ -182,9 +197,9 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 #else
 	strcpy(romdir, "./roms/");
 #endif
-	strcat(romdir, system);
+	strcat(romdir, input->system);
 	strcat(romdir, "/");
-	log_debug("Looking for %s roms in %s\n", system, romdir);
+	log_debug("Looking for %s roms in %s\n", input->system, romdir);
 	int i = 0;
 
 	struct btnData *tmp;
@@ -198,29 +213,31 @@ int loadRomList(struct r_tk *tk, char *ext, char* emu, char* system, char* args)
 			if(ent->d_type == DT_REG)
 			{
 				if(i == 0)
-					new_tab(tk, system);
+					new_tab(input->tk, input->system);
 				strncpy(fancyName, ent->d_name, strcspn(ent->d_name, "."));
-				new_btn(tk, tk->tabHead, fancyName, 0, 0);
+				new_btn(input->tk, input->tk->tabHead, fancyName, 0, 0);
 				tmp = malloc(sizeof(struct btnData));
 				tmp->type = rom;
-				strcpy(tmp->emu, emu);
-				strcpy(tmp->arg, args);
+				strcpy(tmp->emu, input->cmd);
+				strcpy(tmp->arg, input->args);
 				strcpy(tmp->path, strcat(romdir, ent->d_name));
-				tk->tabHead->btnTail->progData = tmp;
+				input->tk->tabHead->btnTail->progData = tmp;
 				i++;
 			}
 		}
-		toolkit->tabHead->isList = 1;
+		input->tk->tabHead->isList = 1;
 	}
 	else
 	{
 		log_warn("Failed opening %s directory\n", romdir);
+		free(input);
 		return 1;
 	}
 	if(i == 0)
-		log_debug("No %s roms found in %s\n", system, romdir);
+		log_debug("No %s roms found in %s\n", input->system, romdir);
 	else
-		log_debug("Found %d roms for %s\n", i, system);
+		log_debug("Found %d roms for %s\n", i, input->system);
+	free(input);
 }
 
 int main(void)
