@@ -230,11 +230,8 @@ void* loadRomList(void *arg)
 		input->tk->tabHead->isList = 1;
 	}
 	else
-		log_warn("Failed opening %s directory\n", romdir);
-	if(i == 0)
-		log_debug("No %s roms found in %s\n", input->system, romdir);
-	else
-		log_debug("Found %d roms for %s\n", i, input->system);
+		log_warn("Failed opening \"%s\" directory\n", romdir);
+	log_debug("Found \"%d\" roms for \"%s\" in \"%s\"\n", i, input->system, romdir);
 	free(input);
 }
 
