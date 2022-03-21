@@ -170,7 +170,7 @@ struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 	return tmp;
 }
 
-void new_tab(struct r_tk *tk, char *name)
+struct r_tk_tab* new_tab(struct r_tk *tk, char *name)
 {
 	struct r_tk_tab *tmp;
 	tmp = _new_tab(tk, name);
@@ -184,6 +184,8 @@ void new_tab(struct r_tk *tk, char *name)
 
 	tk->tabHead->prev = tk->tabTail;
 	tk->tabTail->next = tk->tabHead;
+
+	return tmp;
 }
 
 struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *other, int offset)
