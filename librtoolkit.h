@@ -37,6 +37,7 @@ struct r_tk_btn
 struct r_tk_tab
 {
 	int id;
+	void *progData;
 
 	int offsetY;
 	int wantOffsetY;
