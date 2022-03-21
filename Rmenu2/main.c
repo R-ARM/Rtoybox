@@ -40,6 +40,7 @@ void run_wait(char *path, char *arg1, char *arg2)
 		fopen("/tmp/curpid", "w");
 		fprintf(pidFile, "0");
 		fclose(fopen("/tmp/curPid", "w"));
+		free(pidFile);
 
 		r_flush_input_events();
 	}
@@ -228,6 +229,7 @@ void* loadRomList(void *arg)
 			}
 		}
 		input->tk->tabHead->isList = 1;
+		free(d);
 	}
 	else
 		log_warn("Failed opening \"%s\" directory\n", romdir);
