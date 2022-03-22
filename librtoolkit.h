@@ -396,13 +396,11 @@ int r_tk_draw(struct r_tk *tk, int width)
 	struct r_tk_tab *tmp;
 	struct r_tk_btn *tmpBtn;
 
-#if 0
 	if(tk->reDraw == 0)
 	{
 		sem_post(&tk->draw_done_sem);
 		return 0;
 	}
-#endif
 	
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
@@ -495,7 +493,7 @@ int r_tk_draw(struct r_tk *tk, int width)
 			tk->oldTab = NULL;
 	}
 
-	if(tk->curTab->wantOffsetX == tk->curTab->offsetX || tk->curTab->wantOffsetY == tk->curTab->offsetY)
+	if(tk->curTab->wantOffsetX == tk->curTab->offsetX && tk->curTab->wantOffsetY == tk->curTab->offsetY)
 		tk->reDraw = 0;
 	
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
