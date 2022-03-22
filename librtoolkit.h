@@ -72,6 +72,7 @@ struct r_tk
 
 	int width;
 	int height;
+	int reDraw;
 
 	int tabOffsetX;
 	int tabWantOffsetX;
@@ -103,6 +104,7 @@ void r_tk_next_tab(struct r_tk *tk)
 		tk->curTab->offsetX = tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
+	tk->reDraw = 1;
 }
 
 void r_tk_prev_tab(struct r_tk *tk)
@@ -118,12 +120,14 @@ void r_tk_prev_tab(struct r_tk *tk)
 		tk->curTab->offsetX = -1 * tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
+	tk->reDraw = 1;
 }
 
 void r_tk_toggle_cotab(struct r_tk *tk)
 {
 	if(tk->curTab->coTab != 0)
 		tk->curTab->coTabAct = !tk->curTab->coTabAct;
+	tk->reDraw = 1;
 }
 
 void r_tk_next_btn(struct r_tk *tk)
@@ -138,6 +142,7 @@ void r_tk_next_btn(struct r_tk *tk)
 		if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
 			tk->curTab->curBtn = tk->curTab->curBtn->prev;
 	}
+	tk->reDraw = 1;
 }
 
 void r_tk_prev_btn(struct r_tk *tk)
@@ -152,6 +157,7 @@ void r_tk_prev_btn(struct r_tk *tk)
 		if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
 			tk->curTab->curBtn = tk->curTab->curBtn->next;
 	}
+	tk->reDraw = 1;
 }
 
 struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
@@ -167,6 +173,7 @@ struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 
 	tmp->scrolling = 1;
 
+	tk->reDraw = 1;
 	return tmp;
 }
 
@@ -225,6 +232,7 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 
 	tab->hasButtons = 1;
 
+	tk->reDraw = 1;
 	return tmp->id;
 }
 
@@ -253,6 +261,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->renderer = *renderer;
 	tmp->font = font;
 	tmp->btn_cb = cb;
+	tmp->reDraw = 1;
 
 	struct r_tk_tab *initialTab;
 	initialTab = calloc(1, sizeof(struct r_tk_tab));
@@ -374,6 +383,7 @@ int _r_tk_input_handler(int type, int code, int value)
 			break;
 	}
 
+	toolkit->reDraw = 1;
 	return 0;
 
 	out:
@@ -386,9 +396,19 @@ int r_tk_draw(struct r_tk *tk, int width)
 	struct r_tk_tab *tmp;
 	struct r_tk_btn *tmpBtn;
 
+#if 0
+	if(tk->reDraw == 0)
+	{
+		sem_post(&tk->draw_done_sem);
+		return 0;
+	}
+#endif
+	
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
 
+	//log_debug("Need to redraw? %d\n", tk->reDraw);
+	SDL_RenderClear(tk->renderer);
 	int i = 0;
 	if(tk->tabTail != tk->tabHead)
 	{
@@ -474,6 +494,12 @@ int r_tk_draw(struct r_tk *tk, int width)
 		if(tk->oldTab->wantOffsetX - tk->oldTab->offsetX)
 			tk->oldTab = NULL;
 	}
+
+	if(tk->curTab->wantOffsetX == tk->curTab->offsetX || tk->curTab->wantOffsetY == tk->curTab->offsetY)
+		tk->reDraw = 0;
+	
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
+	SDL_RenderPresent(tk->renderer);
+
 	sem_post(&tk->draw_done_sem);
 }

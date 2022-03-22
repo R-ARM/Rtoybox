@@ -259,9 +259,7 @@ int main(void)
 	SDL_Event event;
 	while (1)
 	{
-		SDL_RenderClear(renderer);
 		r_tk_draw(toolkit, 480);
-		SDL_RenderPresent(renderer);
 
 		fflush(stdout);
 		while(SDL_PollEvent(&event) == 1)
