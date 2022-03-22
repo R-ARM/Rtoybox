@@ -390,7 +390,7 @@ int _r_tk_input_handler(int type, int code, int value)
 	//return _r_tk_prog_input(type, code, value); // maybe in future?
 }
 
-int r_tk_draw(struct r_tk *tk, int width)
+int r_tk_draw(struct r_tk *tk)
 {
 	// draw tabs
 	struct r_tk_tab *tmp;
