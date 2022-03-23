@@ -78,12 +78,12 @@ int main(void)
 			{
 				log_debug("Adding file %s\n", ent->d_name);
 
-				pathLen = 1 + strlen(realpath(ent->d_name, NULL)) + strlen("file://");
+				pathLen = strlen(realpath(ent->d_name, NULL)) + strlen("file://");
 				path = malloc(pathLen);
 				strcpy(path, "file://");
 				strncat(path, realpath(ent->d_name, NULL), pathLen - strlen("file://"));
 				
-				nameLen = 1 + strcspn(ent->d_name, ".");
+				nameLen = strcspn(ent->d_name, ".");
 				name = malloc(nameLen);
 				strncpy(name, ent->d_name, nameLen);
 
