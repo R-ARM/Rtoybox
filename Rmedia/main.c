@@ -95,6 +95,7 @@ int main(void)
 				numFiles++;
 			}
 		}
+		free(d);
 	}
 	else
 	{
