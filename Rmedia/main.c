@@ -11,12 +11,12 @@ TTF_Font *font;
 struct r_media *md;
 struct r_tk *toolkit;
 int numFiles = 0;
-char *nextName = NULL;
+char *nextPath = NULL;
 
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	log_debug("Forcing new file and forcing new track\n");
-	nextName = btn->name;
+	nextPath = (char *)btn->progData;
 	force_new_track(md);
 }
 
@@ -27,22 +27,24 @@ char* getRandomFile(struct r_tk_tab *tab)
 	log_debug("Loading fileID %d\n", randId);
 	while(button->id != randId) // TODO: timeout
 		button = button->prev;
-	log_debug("Random filename: %s\n", button->name);
-	return button->name;
+	log_debug("Random filename: %s\n", (char *)button->progData);
+	return (char *)button->progData;
 }
 
 static gboolean load_new (GstElement * playbin, gpointer udata)
 {
 	log_debug("Loading new file\n");
 	// TODO: not shuffle
-	char newUri[256] = "file://";
-	if(nextName != NULL)
+	char newUri[256] = "";
+	if(nextPath != NULL)
 	{
-		strncat(newUri, realpath(nextName, NULL), 248);
-		nextName = NULL;
+		strncat(newUri, nextPath, 248);
+		nextPath = NULL;
 	}
 	else
-		strncat(newUri, realpath(getRandomFile(toolkit->curTab), NULL), 248);
+	{
+		strncat(newUri, getRandomFile(toolkit->curTab), 248);
+	}
 
 	log_debug("Playing: %s\n", newUri);
 	g_object_set(playbin, "uri", newUri, NULL);
@@ -66,12 +68,30 @@ int main(void)
 	d = opendir("./");
 	if(d)
 	{
+		char *path;
+		char *name;
+		int pathLen = 0;
+		int nameLen = 0;
 		while((ent = readdir(d)) != NULL)
 		{
 			if(ent->d_type == DT_REG)
 			{
-				log_debug("Loading %s\n", ent->d_name);
-				new_btn(toolkit, toolkit->tabHead, ent->d_name, 0, 0);
+				log_debug("Adding file %s\n", ent->d_name);
+
+				pathLen = 1 + strlen(realpath(ent->d_name, NULL)) + strlen("file://");
+				path = malloc(pathLen);
+				strcpy(path, "file://");
+				strncat(path, realpath(ent->d_name, NULL), pathLen - strlen("file://"));
+				
+				nameLen = 1 + strcspn(ent->d_name, ".");
+				name = malloc(nameLen);
+				strncpy(name, ent->d_name, nameLen);
+
+
+				new_btn(toolkit, toolkit->tabHead, name, 0, 0);
+				toolkit->tabHead->btnTail->progData = path;
+				
+				free(name);
 				numFiles++;
 			}
 		}
@@ -83,6 +103,7 @@ int main(void)
 	}
 	log_debug("Loaded %d files\n", numFiles);
 	load_new(md->playbin, NULL);
+
 	g_signal_connect(md->playbin, "about-to-finish", G_CALLBACK(load_new), NULL);
 	int ret;
 	ret = gst_element_set_state(md->playbin, GST_STATE_PLAYING);
