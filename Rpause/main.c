@@ -88,10 +88,14 @@ int getVolume()
 
 int getBrightness()
 {
+#ifdef ROS
 	int cur = readIntFrom("/sys/class/backlight/backlight/brightness");
 	int max = readIntFrom("/sys/class/backlight/backlight/max_brightness");
 
 	return cur * (100.0/max);
+#else
+	return 50;
+#endif
 }
 
 int getBatPercent()
@@ -101,15 +105,15 @@ int getBatPercent()
 	int max = readIntFrom("/sys/class/power_supply/rk817-battery/charge_full_design");
 	return cur * (100.0/max);
 #else
-	//return readIntFrom("/sys/class/power_supply/rk817-battery/capacity");
+	return 50;
 #endif
 }
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff);
-	r_attach_input_callback(handle_input);
+	r_init(&renderer, &window, &font, 0xff, 24);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
+	r_attach_input_callback(handle_input);
 	new_btn_list_batch(toolkit, toolkit->tabHead, 5, "Resume", "Toggle FPS View", "Volume", "Brightness", "Battery");
 	toolkit->tabHead->isList = 1;
 	toolkit->tabHead->scrolling = 0;
@@ -126,7 +130,7 @@ int main(void)
 	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, " ", " ", volBuffer, brBuffer, batBuffer);
 	toolkit->tabHead->coTab->isList = 1;
 	toolkit->tabHead->coTab->scrolling = 0;
-
+	
 	pid = readIntFrom("/tmp/curpid");
 	kill(pid, 19); // SIGSTOP
 
@@ -134,7 +138,7 @@ int main(void)
 	while (1)
 	{
 		SDL_RenderClear(renderer);
-		r_tk_draw(toolkit, 480);
+		r_tk_draw(toolkit);
 		SDL_RenderPresent(renderer);
 
 		fflush(stdout);
