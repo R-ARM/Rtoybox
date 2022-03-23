@@ -61,7 +61,7 @@ int main(void)
 	DIR *d;
 	struct dirent *ent;
 #ifdef ROS
-	chdir("/music/");
+	chdir("/data/music/");
 #else
 	chdir("./music");
 #endif
