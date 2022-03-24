@@ -202,7 +202,7 @@ void* loadRomList(void *arg)
 #endif
 	strcat(romdir, input->system);
 	strcat(romdir, "/");
-	log_debug("Looking for %s roms in %s\n", input->system, romdir);
+	log_debug("Looking for \"%s\" roms in \"%s\"\n", input->system, romdir);
 	int i = 0;
 
 	struct btnData *tmp;
