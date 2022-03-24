@@ -103,18 +103,19 @@ int loadStaticData(struct r_tk *tk)
 		return 1;
 	}
 
-	char tmp[256];
-	char tmp2[256];
+	char name[256];
+	char path[256];
 
-	while(fscanf(in, "%s %s", tmp, tmp2) == 2)
+	while(fscanf(in, "%s %s", name, path) == 2)
 	{
-		log_debug("Got program: name: \"%s\", path: \"%s\"\n", tmp, tmp2);
-		new_btn(tk, tk->tabHead, tmp, 0, 0);
+		log_debug("Got program: name: \"%s\", path: \"%s\"\n", name, path);
+
 		tmpData = malloc(sizeof(struct btnData));
 		tmpData->type = prog;
-		tmpData->path = malloc(strlen(tmp2));
-		strcpy(tmpData->path, tmp2);
+		tmpData->path = malloc(strlen(path));
+		strcpy(tmpData->path, path);
 
+		new_btn(tk, tk->tabHead, name, 0, 0);
 		tk->tabHead->btnTail->progData = tmpData;
 	}
 }
