@@ -79,10 +79,10 @@ int main(void)
 				log_debug("Adding file %s\n", ent->d_name);
 
 				// construct the uri
-				pathLen = strlen(realpath(ent->d_name, NULL)) + strlen("file://");
-				path = malloc(pathLen);
+				pathLen = strlen(realpath(ent->d_name, NULL));
+				path = malloc(pathLen + strlen("file://"));
 				strcpy(path, "file://");
-				strncat(path, realpath(ent->d_name, NULL), pathLen - strlen("file://"));
+				strncat(path, realpath(ent->d_name, NULL), pathLen);
 				
 				// constuct button name, snipping away file extension
 				nameLen = strcspn(ent->d_name, ".");
