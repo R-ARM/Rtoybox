@@ -15,8 +15,8 @@ enum btnType{rom, prog, special};
 struct btnData
 {
 	char *emu;
-	char arg[256];
-	char path[256];
+	char *arg;
+	char *path;
 	enum btnType type;
 };
 
@@ -116,6 +116,7 @@ int loadStaticData(struct r_tk *tk)
 		new_btn(tk, tk->tabHead, tmp, 0, 0);
 		tmpData = malloc(sizeof(struct btnData));
 		tmpData->type = prog;
+		tmpData->path = malloc(strlen(tmp2));
 		strcpy(tmpData->path, tmp2);
 
 		tk->tabHead->btnTail->progData = tmpData;
@@ -222,8 +223,8 @@ void* loadRomList(void *arg)
 				tmp = malloc(sizeof(struct btnData));
 				tmp->type = rom;
 				tmp->emu = input->cmd;
-				strcpy(tmp->arg, input->args);
-				strcpy(tmp->path, strcat(romdir, ent->d_name));
+				tmp->arg = input->args;
+				tmp->path = strcat(romdir, ent->d_name);
 				input->tk->tabHead->btnTail->progData = tmp;
 				i++;
 			}
