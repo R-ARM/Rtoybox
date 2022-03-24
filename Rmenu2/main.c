@@ -106,13 +106,9 @@ int loadStaticData(struct r_tk *tk)
 	char tmp[256];
 	char tmp2[256];
 
-	while(1)
+	while(fscanf(in, "%s %s", tmp, tmp2) == 2)
 	{
-		fscanf(in, "%s %s", tmp, tmp2);
-
-		if(feof(in) != 0)
-			break;
-
+		log_debug("Got program: name: \"%s\", path: \"%s\"\n", tmp, tmp2);
 		new_btn(tk, tk->tabHead, tmp, 0, 0);
 		tmpData = malloc(sizeof(struct btnData));
 		tmpData->type = prog;
