@@ -51,7 +51,7 @@ static gboolean load_new (GstElement * playbin, gpointer udata)
 	return TRUE;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
 	r_init(&renderer, &window, &font, 0xff, 24);
 	toolkit = new_r_tk(&window, &renderer, &font, "Tracks", buttonStateCallback);
@@ -63,7 +63,10 @@ int main(void)
 #ifdef ROS
 	chdir("/data/music/");
 #else
-	chdir("./music");
+	if(argc > 1 && strlen(argv[1]) > 0)
+		chdir(argv[1]);
+	else
+		chdir("./music");
 #endif
 	d = opendir("./");
 	if(d)
@@ -139,29 +142,29 @@ int main(void)
 				case SDL_KEYDOWN:
 					switch(event.key.keysym.sym)
 					{
-					case SDLK_w: // trigger right
+					case SDLK_r: // trigger right
 						force_new_track(md);
 						break;
-					case SDLK_q: // trigger left
+					case SDLK_l: // trigger left
 						// prev track TODO
 						break;
-					case SDLK_a: // left
+					case SDLK_LEFT: // left
 						seek_sec(md, -5);
 						break;
-					case SDLK_s: // right
+					case SDLK_RIGHT: // right
 						seek_sec(md, 5);
 						break;
-					case SDLK_z: // down
+					case SDLK_DOWN: // down
 						r_tk_prev_btn(toolkit);
 						break;
-					case SDLK_x: // up
+					case SDLK_UP: // up
 						r_tk_next_btn(toolkit);
 						break;
-					case SDLK_e: // A
+					case SDLK_a: // A
 						// load new track
 						r_tk_action(toolkit);
 						break;
-					case SDLK_t: // B
+					case SDLK_b: // B
 						play_pause(md);
 						break;
 					}
