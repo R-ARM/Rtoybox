@@ -82,18 +82,19 @@ int main(int argc, char **argv)
 				log_debug("Adding file %s\n", ent->d_name);
 
 				// construct the uri
-				pathLen = strlen(realpath(ent->d_name, NULL));
-				path = malloc(pathLen + strlen("file://"));
+				pathLen = 1 + strlen(realpath(ent->d_name, NULL));
+				path = calloc(1, pathLen + strlen("file://"));
 				strcpy(path, "file://");
 				strncat(path, realpath(ent->d_name, NULL), pathLen);
 				
 				// constuct button name, snipping away file extension
-				nameLen = strcspn(ent->d_name, ".");
-				name = malloc(nameLen);
+				nameLen = 1 + strcspn(ent->d_name, ".");
+				name = calloc(1, nameLen);
 				strncpy(name, ent->d_name, nameLen);
 
 
 				// and finally add button, as well as pointing button's progData pointer at uri
+				log_debug("Button name: %s\n", name);
 				new_btn(toolkit, toolkit->tabHead, name, 0, 0);
 				toolkit->tabHead->btnTail->progData = (void *)path;
 				
