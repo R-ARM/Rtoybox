@@ -307,7 +307,8 @@ void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 			tmpBtn->rect.x = 0 + tab->offsetX;
 			tmpBtn->rect.y = (tk->fontsize + 1) * i - fmax(tab->offsetY, 0);
 
-			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+			if(tmpBtn->rect.y + tmpBtn->rect.h > 0 && tmpBtn->rect.y < tk->height)
+				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
 
 			tmpBtn->rect.x = 0;
 			tmpBtn->rect.y = (tk->fontsize + 1) * i;
