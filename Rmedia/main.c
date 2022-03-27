@@ -88,7 +88,7 @@ int main(int argc, char **argv)
 				strncat(path, realpath(ent->d_name, NULL), pathLen);
 				
 				// constuct button name, snipping away file extension
-				nameLen = 1 + strcspn(ent->d_name, ".");
+				nameLen = strcspn(ent->d_name, ".");
 				name = calloc(1, nameLen);
 				strncpy(name, ent->d_name, nameLen);
 
