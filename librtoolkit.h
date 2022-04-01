@@ -457,7 +457,7 @@ int r_tk_draw(struct r_tk *tk)
 
 		// line separating tabs and other widgets
 		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
-		SDL_RenderDrawLine(tk->renderer, 0, 1, tk->width, 1);
+		SDL_RenderDrawLine(tk->renderer, 0, 0, tk->width, 0);
 		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 	}
 	// draw buttons
