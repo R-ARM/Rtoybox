@@ -15,7 +15,7 @@ void buttonStateCallback(struct r_tk_btn *btn)
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff);
+	r_init(&renderer, &window, &font, 0xff, 26);
 	toolkit = new_r_tk(&window, &renderer, &font, "Test", buttonStateCallback);
 
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
@@ -60,7 +60,7 @@ int main(void)
 	while (1)
 	{
 		SDL_RenderClear(renderer);
-		r_tk_draw(toolkit, 480);
+		r_tk_draw(toolkit);
 		SDL_RenderPresent(renderer);
 
 		while(SDL_PollEvent(&event) == 1)
