@@ -397,6 +397,8 @@ int r_tk_draw(struct r_tk *tk)
 	struct r_tk_tab *tmp;
 	struct r_tk_btn *tmpBtn;
 
+
+	//log_debug("Need to redraw? %d\n", tk->reDraw);
 	if(tk->reDraw == 0)
 	{
 		sem_post(&tk->draw_done_sem);
@@ -406,7 +408,6 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
 
-	//log_debug("Need to redraw? %d\n", tk->reDraw);
 	SDL_RenderClear(tk->renderer);
 	int i = 0;
 	if(tk->tabTail != tk->tabHead)
@@ -471,7 +472,10 @@ int r_tk_draw(struct r_tk *tk)
 		{
 			tk->curTab->wantOffsetY = tk->curTab->curBtn->rect.y - tk->fontsize - 1;
 			if(tk->curTab->wantOffsetY != tk->curTab->offsetY)
-				tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
+				if(fabs(tk->curTab->wantOffsetY - tk->curTab->offsetY) < 2)
+					tk->curTab->offsetY = tk->curTab->wantOffsetY;
+				else
+					tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
 		}
 		if(tk->curTab->coTab != 0 && tk->curTab->coTab->scrolling == 1)
 		{
@@ -494,8 +498,10 @@ int r_tk_draw(struct r_tk *tk)
 			tk->oldTab = NULL;
 	}
 
-	if(tk->curTab->wantOffsetX == tk->curTab->offsetX && tk->curTab->wantOffsetY == tk->curTab->offsetY)
+	if((tk->curTab->wantOffsetX == tk->curTab->offsetX) && (tk->curTab->wantOffsetY == tk->curTab->offsetY))
 		tk->reDraw = 0;
+	
+	//log_debug("want x = %d, x = %d, want y = %d, y = %d\n", tk->curTab->wantOffsetX, tk->curTab->offsetX, tk->curTab->wantOffsetY, tk->curTab->offsetY);
 	
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
 	SDL_RenderPresent(tk->renderer);
