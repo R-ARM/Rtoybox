@@ -20,10 +20,13 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 	rect->h = text_height;
 }
 
+#define BTN_TYPE_CLICK	0
+#define BTN_TYPE_TOGGLE	1
 struct r_tk_btn
 {
 	int id;
 	int state;
+	int type;
 	char name[255];
 	void *progData;
 
@@ -349,6 +352,8 @@ void r_tk_action(struct r_tk *tk)
 		tmp = tk->curTab->coTab->curBtn;
 	else
 		tmp = tk->curTab->curBtn;
+	if(tmp->type == BTN_TYPE_TOGGLE)
+		tmp->state = !tmp->state;
 	if(tmp != NULL && tmp != 0)
 		tk->btn_cb(tmp);
 }
