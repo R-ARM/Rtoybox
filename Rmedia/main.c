@@ -84,8 +84,7 @@ int main(int argc, char **argv)
 				// construct the uri
 				pathLen = 1 + strlen(realpath(ent->d_name, NULL));
 				path = calloc(1, pathLen + strlen("file://"));
-				strcpy(path, "file://");
-				strncat(path, realpath(ent->d_name, NULL), pathLen);
+				sprintf(path, "file://%s", realpath(ent->d_name, NULL));
 				
 				// constuct button name, snipping away file extension
 				nameLen = strcspn(ent->d_name, ".");
