@@ -221,7 +221,8 @@ void* loadRomList(void *arg)
 				tmp->type = rom;
 				tmp->emu = input->cmd;
 				tmp->arg = input->args;
-				tmp->path = strcat(romdir, ent->d_name);
+				tmp->path = malloc(strlen(romdir) + strlen(ent->d_name));
+				sprintf(tmp->path, "%s%s", romdir, ent->d_name);
 				input->tk->tabHead->btnTail->progData = tmp;
 				i++;
 			}
