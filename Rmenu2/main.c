@@ -62,6 +62,39 @@ void run_wait(char *path, char *arg1, char *arg2)
 	}
 }
 
+void writeMednafenConfigLine(char *key, char* value)
+{
+	pid_t childPid;
+	log_debug("Setting \"%s\" to \"%s\"\n", key, value);
+
+	childPid = fork();
+	if(childPid > 0)
+	{
+		int status;
+		waitpid(childPid, &status, 0);
+		if(status == 255)
+			return 0; // experimentally found that it's ok
+		
+		return status;
+	}
+	else
+	{
+		// mednafen config changes need argument "-key" instead "key" itself
+		char *minusKey = malloc(strlen(key) + 1);
+		sprintf(minusKey, "-%s", key);
+		execl("/usr/games/mednafen", "mednafen", minusKey, value, NULL);
+		log_err("Error changing mednafen config: %s\n", strerror(errno));
+		exit(1);
+	}
+}
+
+inline void writeMednafenConfigLineInt(char *key, int value)
+{
+	char buf[65];
+	sprintf(buf, "%d", value);
+	writeMednafenConfigLine(key, buf);
+}
+
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	struct btnData *tmp;
@@ -74,7 +107,12 @@ void buttonStateCallback(struct r_tk_btn *btn)
 		exit(0);
 #endif
 	}
-	if(btn->progData != NULL)
+	else if(strcmp(btn->name, "Scanlines") == 0)
+	{
+		log_debug("Setting nes scanlines to %d\n", btn->state);
+		writeMednafenConfigLineInt("nes.scanlines", btn->state);
+	}
+	else if(btn->progData != NULL)
 	{
 		tmp = (struct btnData *)btn->progData;
 		switch(tmp->type)
@@ -214,13 +252,21 @@ void* loadRomList(void *arg)
 			if(ent->d_type == DT_REG)
 			{
 				if(i == 0)
+				{
 					new_tab(input->tk, input->system);
+					new_toggle(input->tk, input->tk->tabHead, "Scanlines", 0, 0, 0, BTN_STATEPOS_RIGHT, 0);
+				}
 				strncpy(fancyName, ent->d_name, strcspn(ent->d_name, "."));
 				new_btn(input->tk, input->tk->tabHead, fancyName, 0, 0);
 				tmp = malloc(sizeof(struct btnData));
 				tmp->type = rom;
-				tmp->emu = input->cmd;
-				tmp->arg = input->args;
+
+				tmp->emu = malloc(strlen(input->cmd));
+				strcpy(tmp->emu, input->cmd);
+				
+				tmp->arg = malloc(strlen(input->args));
+				strcpy(tmp->arg, input->args);
+
 				tmp->path = malloc(strlen(romdir) + strlen(ent->d_name));
 				sprintf(tmp->path, "%s%s", romdir, ent->d_name);
 				input->tk->tabHead->btnTail->progData = tmp;
