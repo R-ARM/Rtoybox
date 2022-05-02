@@ -206,7 +206,7 @@ struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *other, int offset)
 	other->coTab->coTab = other;
 }
 
-int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
+struct r_tk_btn * new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 {
 	struct r_tk_btn *tmp;
 
@@ -236,7 +236,18 @@ int new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
 	tab->hasButtons = 1;
 
 	tk->reDraw = 1;
-	return tmp->id;
+	return tmp;
+}
+
+struct r_tk_btn * new_toggle(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y, int initState)
+{
+	struct r_tk_btn *tmp;
+	tmp = new_btn(tk, tab, name, x, y);
+	
+	tmp->type = BTN_TYPE_TOGGLE;
+	tmp->state = initState;
+
+	return tmp;		
 }
 
 void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
@@ -310,8 +321,7 @@ void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 			tmpBtn->rect.x = 0 + tab->offsetX;
 			tmpBtn->rect.y = (tk->fontsize + 1) * i - fmax(tab->offsetY, 0);
 
-			if(tmpBtn->rect.y + tmpBtn->rect.h > 0 && tmpBtn->rect.y < tk->height)
-				SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+			draw_btn(tk, tmpBtn);
 
 			tmpBtn->rect.x = 0;
 			tmpBtn->rect.y = (tk->fontsize + 1) * i;
@@ -321,7 +331,7 @@ void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 			tmpBtn->rect.x += tab->offsetX;
 			tmpBtn->rect.y -= tab->offsetY;
 
-			SDL_RenderCopy(tk->renderer, tmpBtn->text, NULL, &tmpBtn->rect);
+			draw_btn(tk, tmpBtn);
 
 			tmpBtn->rect.x -= tab->offsetX;
 			tmpBtn->rect.y += tab->offsetY;
@@ -330,6 +340,41 @@ void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 		tmpBtn = tmpBtn->next;
 		i++;
 	}
+}
+
+void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
+{
+	int margin = 2;
+
+	if(btn->rect.y + btn->rect.h < 0)
+		return;
+
+	if(btn->type == BTN_TYPE_TOGGLE)
+	{
+		struct SDL_Rect toggleRect;
+		
+		// make a square with padding of 1px 
+		toggleRect.x = btn->rect.x + margin;
+		toggleRect.y = btn->rect.y + margin;
+		toggleRect.w = btn->rect.h - margin*2;
+		toggleRect.h = btn->rect.h - margin*2;
+		
+		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255); // TODO: coloring
+
+		if(btn->state == 1)
+			SDL_RenderFillRect(tk->renderer, &toggleRect);
+		else
+			SDL_RenderDrawRect(tk->renderer, &toggleRect);
+	}
+
+
+	if(btn->type == BTN_TYPE_TOGGLE)
+		btn->rect.x += tk->fontsize + margin*2;
+
+	SDL_RenderCopy(tk->renderer, btn->text, NULL, &btn->rect);
+
+	if(btn->type == BTN_TYPE_TOGGLE)
+		btn->rect.x -= tk->fontsize + margin*2;
 }
 
 void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
@@ -353,7 +398,10 @@ void r_tk_action(struct r_tk *tk)
 	else
 		tmp = tk->curTab->curBtn;
 	if(tmp->type == BTN_TYPE_TOGGLE)
+	{
 		tmp->state = !tmp->state;
+		tk->reDraw = 1;
+	}
 	if(tmp != NULL && tmp != 0)
 		tk->btn_cb(tmp);
 }
@@ -413,11 +461,11 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
 
+	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
 	SDL_RenderClear(tk->renderer);
 	int i = 0;
 	if(tk->tabTail != tk->tabHead)
 	{
-
 		SDL_Rect tabs;
 		tabs.x = 0;
 		tabs.y = 0;
