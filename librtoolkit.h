@@ -20,13 +20,22 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 	rect->h = text_height;
 }
 
-#define BTN_TYPE_CLICK	0
-#define BTN_TYPE_TOGGLE	1
+#define BTN_TYPE_CLICK		0
+#define BTN_TYPE_TOGGLE		1
+
+#define BTN_STATEPOS_LEFT	0
+#define BTN_STATEPOS_RIGHT	1
+#define BTN_STATEPOS_CUSTOM	2
+
 struct r_tk_btn
 {
 	int id;
 	int state;
 	int type;
+
+	int statePositioning;
+	int forceStateX;
+
 	char name[255];
 	void *progData;
 
@@ -239,13 +248,15 @@ struct r_tk_btn * new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int
 	return tmp;
 }
 
-struct r_tk_btn * new_toggle(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y, int initState)
+struct r_tk_btn * new_toggle(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y, int initState, int stateAlign, int statePosition)
 {
 	struct r_tk_btn *tmp;
 	tmp = new_btn(tk, tab, name, x, y);
 	
 	tmp->type = BTN_TYPE_TOGGLE;
 	tmp->state = initState;
+	tmp->statePositioning = stateAlign;
+	tmp->forceStateX = statePosition;
 
 	return tmp;		
 }
@@ -352,13 +363,29 @@ void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
 	if(btn->type == BTN_TYPE_TOGGLE)
 	{
 		struct SDL_Rect toggleRect;
-		
-		// make a square with padding of 1px 
-		toggleRect.x = btn->rect.x + margin;
-		toggleRect.y = btn->rect.y + margin;
+
 		toggleRect.w = btn->rect.h - margin*2;
 		toggleRect.h = btn->rect.h - margin*2;
-		
+	
+		switch(btn->statePositioning)
+		{
+			case BTN_STATEPOS_LEFT:
+				// make a square with padding of 1px 
+				toggleRect.x = btn->rect.x + margin;
+				toggleRect.y = btn->rect.y + margin;
+				btn->rect.x += tk->fontsize + margin*2;
+				break;
+			case BTN_STATEPOS_RIGHT:
+				// ditto
+				toggleRect.x = btn->rect.x + margin + btn->rect.w;
+				toggleRect.y = btn->rect.y + margin;
+				break;
+			case BTN_STATEPOS_CUSTOM:
+				toggleRect.x = btn->forceStateX;
+				toggleRect.y = btn->rect.y + margin;
+				break;
+		}
+
 		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255); // TODO: coloring
 
 		if(btn->state == 1)
@@ -368,12 +395,9 @@ void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
 	}
 
 
-	if(btn->type == BTN_TYPE_TOGGLE)
-		btn->rect.x += tk->fontsize + margin*2;
-
 	SDL_RenderCopy(tk->renderer, btn->text, NULL, &btn->rect);
 
-	if(btn->type == BTN_TYPE_TOGGLE)
+	if(btn->type == BTN_TYPE_TOGGLE && btn->statePositioning == BTN_STATEPOS_LEFT)
 		btn->rect.x -= tk->fontsize + margin*2;
 }
 
