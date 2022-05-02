@@ -21,6 +21,10 @@ int main(void)
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
 	new_btn(toolkit, toolkit->tabHead, "needs some", 3, 30);
 	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
+	new_toggle(toolkit, toolkit->tabHead, "i'm a toggle!", 0, 90, 0, BTN_STATEPOS_LEFT, 0);
+	new_toggle(toolkit, toolkit->tabHead, "my box is on the right!", 0, 120, 0, BTN_STATEPOS_RIGHT, 0);
+	new_toggle(toolkit, toolkit->tabHead, "and mines aligned", 0, 150, 0, BTN_STATEPOS_CUSTOM, 240);
+	new_toggle(toolkit, toolkit->tabHead, "with mine", 0, 180, 0, BTN_STATEPOS_CUSTOM, 240);
 	toolkit->tabHead->scrolling = 0;
 
 	new_cotab(toolkit, toolkit->tabHead, 300);
@@ -29,7 +33,6 @@ int main(void)
 	toolkit->tabHead->coTab->scrolling = 1;
 
 	new_tab(toolkit, "two");
-	printf("%d\n", new_btn(toolkit, toolkit->tabHead, "ss", 20, 0));
 	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "tetwerg", 20, 0);
 	new_btn(toolkit, toolkit->tabHead, "qwertyoip", 20, 0);
