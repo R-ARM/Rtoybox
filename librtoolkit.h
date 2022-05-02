@@ -27,10 +27,15 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 #define BTN_STATEPOS_RIGHT	1
 #define BTN_STATEPOS_CUSTOM	2
 
+union buttonState {
+	int integer;
+	char *string;
+};
+
 struct r_tk_btn
 {
 	int id;
-	int state;
+	union buttonState state;
 	int type;
 
 	int statePositioning;
@@ -254,7 +259,7 @@ struct r_tk_btn * new_toggle(struct r_tk *tk, struct r_tk_tab *tab, char *name, 
 	tmp = new_btn(tk, tab, name, x, y);
 	
 	tmp->type = BTN_TYPE_TOGGLE;
-	tmp->state = initState;
+	tmp->state.integer = initState;
 	tmp->statePositioning = stateAlign;
 	tmp->forceStateX = statePosition;
 
@@ -388,7 +393,7 @@ void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
 
 		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255); // TODO: coloring
 
-		if(btn->state == 1)
+		if(btn->state.integer == 1)
 			SDL_RenderFillRect(tk->renderer, &toggleRect);
 		else
 			SDL_RenderDrawRect(tk->renderer, &toggleRect);
@@ -423,7 +428,7 @@ void r_tk_action(struct r_tk *tk)
 		tmp = tk->curTab->curBtn;
 	if(tmp->type == BTN_TYPE_TOGGLE)
 	{
-		tmp->state = !tmp->state;
+		tmp->state.integer = !tmp->state.integer;
 		tk->reDraw = 1;
 	}
 	if(tmp != NULL && tmp != 0)

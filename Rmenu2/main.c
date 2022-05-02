@@ -109,8 +109,8 @@ void buttonStateCallback(struct r_tk_btn *btn)
 	}
 	else if(strcmp(btn->name, "Scanlines") == 0)
 	{
-		log_debug("Setting nes scanlines to %d\n", btn->state);
-		writeMednafenConfigLineInt("nes.scanlines", btn->state);
+		log_debug("Setting nes scanlines to %d\n", btn->state.integer);
+		writeMednafenConfigLineInt("nes.scanlines", btn->state.integer);
 	}
 	else if(btn->progData != NULL)
 	{
