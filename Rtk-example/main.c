@@ -27,7 +27,7 @@ int main(void)
 	new_toggle(toolkit, toolkit->tabHead, "i'm a toggle!", 0, 120, 0, BTN_STATEPOS_LEFT, 0);
 	new_toggle(toolkit, toolkit->tabHead, "my box is on the right!", 0, 150, 0, BTN_STATEPOS_RIGHT, 0);
 	new_toggle(toolkit, toolkit->tabHead, "and mines aligned", 0, 180, 0, BTN_STATEPOS_CUSTOM, 240);
-	new_toggle(toolkit, toolkit->tabHead, "with mine", 0, 1210, 0, BTN_STATEPOS_CUSTOM, 240);
+	new_toggle(toolkit, toolkit->tabHead, "with mine", 0, 210, 0, BTN_STATEPOS_CUSTOM, 240);
 	toolkit->tabHead->scrolling = 0;
 
 	new_tab(toolkit, "two");
