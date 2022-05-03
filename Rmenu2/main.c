@@ -77,10 +77,6 @@ void writeMednafenConfigLine(char* mod, char *opt, char* value)
 	{
 		int status;
 		waitpid(childPid, &status, 0);
-		if(status == 255)
-			return 0; // experimentally found that it's ok
-		
-		return status;
 	}
 	else
 	{
