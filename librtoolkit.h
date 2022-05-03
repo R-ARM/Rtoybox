@@ -451,7 +451,7 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
 	_draw_tab(tk, tab);
 
-	if(tk->curTab->curBtn->type == BTN_TYPE_ONEOF)
+	if(tk->curTab->hasButtons && tk->curTab->curBtn->type == BTN_TYPE_ONEOF)
 	{
 		tab->curCoTab = tk->curTab->curBtn->coTab;
 		tab->curCoTab->offsetX += tab->offsetX;
