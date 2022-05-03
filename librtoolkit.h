@@ -312,6 +312,8 @@ struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, i
 	int maxX = 0;
 	struct r_tk_btn *tmp;
 
+	oneof->state.pointer = 0;
+
 	for(int i = 0; i < num; i++)
 	{
 		choice = va_arg(valist, char*);
