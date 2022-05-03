@@ -618,7 +618,10 @@ int r_tk_draw(struct r_tk *tk)
 		{
 			tk->curTab->curCoTab->wantOffsetY = tk->curTab->curCoTab->curBtn->rect.y - tk->fontsize - 1;
 			if(tk->curTab->curCoTab->wantOffsetY != tk->curTab->curCoTab->offsetY)
-				tk->curTab->curCoTab->offsetY += (tk->curTab->curCoTab->wantOffsetY - tk->curTab->curCoTab->offsetY)/2;
+				if(fabs(tk->curTab->curCoTab->offsetY - tk->curTab->curCoTab->wantOffsetY) < 2)
+					tk->curTab->curCoTab->offsetY = tk->curTab->curCoTab->wantOffsetY;
+				else
+					tk->curTab->curCoTab->offsetY += (tk->curTab->curCoTab->wantOffsetY - tk->curTab->curCoTab->offsetY)/2;
 		}
 		draw_tab(tk, tk->curTab);
 	}
@@ -639,9 +642,8 @@ int r_tk_draw(struct r_tk *tk)
 	{
 		if(tk->curTab->curCoTab)
 		{
-			if((tk->curTab->curCoTab->curCoTab->wantOffsetX == tk->curTab->curCoTab->offsetX))
-				if((tk->curTab->curCoTab->wantOffsetY == tk->curTab->curCoTab->offsetY))
-					tk->reDraw = 0;
+			if((tk->curTab->curCoTab->wantOffsetY == tk->curTab->curCoTab->offsetY))
+				tk->reDraw = 0;
 		}
 		else
 		{
