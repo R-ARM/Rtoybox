@@ -80,7 +80,7 @@ void writeMednafenConfigLine(char* mod, char *opt, char* value)
 	}
 	else
 	{
-		execl("/usr/games/mednafen", "mednafen", key, value, NULL);
+		execl("/usr/bin/mednafen", "mednafen", key, value, NULL);
 		log_err("Error changing mednafen config: %s\n", strerror(errno));
 		exit(1);
 	}
