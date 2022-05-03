@@ -22,6 +22,8 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 
 #define BTN_TYPE_CLICK		0
 #define BTN_TYPE_TOGGLE		1
+#define BTN_TYPE_ONEOF		2
+#define BTN_TYPE_ONEOF_CHILD	3
 
 #define BTN_STATEPOS_LEFT	0
 #define BTN_STATEPOS_RIGHT	1
@@ -29,7 +31,7 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 
 union buttonState {
 	int integer;
-	char *string;
+	void *pointer;
 };
 
 struct r_tk_btn
@@ -46,6 +48,8 @@ struct r_tk_btn
 
 	SDL_Rect rect;
 	SDL_Texture *text;
+
+	struct r_tk_tab *coTab;
 
 	struct r_tk_btn *prev;
 	struct r_tk_btn *next;
@@ -71,8 +75,9 @@ struct r_tk_tab
 	struct r_tk_btn *curBtn;
 	struct r_tk_btn *btnHead;
 	struct r_tk_btn *btnTail;
-	
-	struct r_tk_tab *coTab;
+
+	struct r_tk_tab *curCoTab;
+	int isCoTab;
 	int coTabAct;
 
 	struct r_tk_tab *next;
@@ -114,10 +119,10 @@ void r_tk_next_tab(struct r_tk *tk)
 	{
 		tk->curTab->offsetX = 0;
 		tk->curTab->wantOffsetX = -1 * tk->width; // TODO: screen scaling
-	
+
 		tk->oldTab = tk->curTab;
 		tk->curTab = tk->curTab->prev;
-	
+
 		tk->curTab->offsetX = tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
@@ -131,9 +136,9 @@ void r_tk_prev_tab(struct r_tk *tk)
 		tk->curTab->offsetX = 0;
 		tk->curTab->wantOffsetX = tk->width;
 
-		tk->oldTab = tk->curTab;	
+		tk->oldTab = tk->curTab;
 		tk->curTab = tk->curTab->next;
-	
+
 		tk->curTab->offsetX = -1 * tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
@@ -142,7 +147,7 @@ void r_tk_prev_tab(struct r_tk *tk)
 
 void r_tk_toggle_cotab(struct r_tk *tk)
 {
-	if(tk->curTab->coTab != 0)
+	if(tk->curTab->curCoTab != 0)
 		tk->curTab->coTabAct = !tk->curTab->coTabAct;
 	tk->reDraw = 1;
 }
@@ -151,8 +156,8 @@ void r_tk_next_btn(struct r_tk *tk)
 {
 	if(tk->curTab->coTabAct == 1)
 	{
-		if(tk->curTab->coTab->hasButtons == 1 && tk->curTab->coTab->curBtn->prev)
-			tk->curTab->coTab->curBtn = tk->curTab->coTab->curBtn->prev;
+		if(tk->curTab->curCoTab->hasButtons == 1 && tk->curTab->curCoTab->curBtn->prev)
+			tk->curTab->curCoTab->curBtn = tk->curTab->curCoTab->curBtn->prev;
 	}
 	else
 	{
@@ -166,8 +171,8 @@ void r_tk_prev_btn(struct r_tk *tk)
 {
 	if(tk->curTab->coTabAct == 1)
 	{
-		if(tk->curTab->coTab->hasButtons == 1 && tk->curTab->coTab->curBtn->next)
-			tk->curTab->coTab->curBtn = tk->curTab->coTab->curBtn->next;
+		if(tk->curTab->curCoTab->hasButtons == 1 && tk->curTab->curCoTab->curBtn->next)
+			tk->curTab->curCoTab->curBtn = tk->curTab->curCoTab->curBtn->next;
 	}
 	else
 	{
@@ -200,7 +205,7 @@ struct r_tk_tab* new_tab(struct r_tk *tk, char *name)
 	tmp = _new_tab(tk, name);
 	tmp->prev = tk->tabTail;
 	tmp->next = tk->tabHead;
-	tmp->coTab = 0;
+	tmp->curCoTab = 0;
 	tmp->coTabAct = 0;
 
 	tk->tabHead->prev = tmp;
@@ -210,14 +215,6 @@ struct r_tk_tab* new_tab(struct r_tk *tk, char *name)
 	tk->tabTail->next = tk->tabHead;
 
 	return tmp;
-}
-
-struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *other, int offset)
-{
-	other->coTab = _new_tab(tk, other->name);
-
-	other->coTab->offsetX = offset;
-	other->coTab->coTab = other;
 }
 
 struct r_tk_btn * new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y)
@@ -257,13 +254,13 @@ struct r_tk_btn * new_toggle(struct r_tk *tk, struct r_tk_tab *tab, char *name, 
 {
 	struct r_tk_btn *tmp;
 	tmp = new_btn(tk, tab, name, x, y);
-	
+
 	tmp->type = BTN_TYPE_TOGGLE;
 	tmp->state.integer = initState;
 	tmp->statePositioning = stateAlign;
 	tmp->forceStateX = statePosition;
 
-	return tmp;		
+	return tmp;
 }
 
 void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
@@ -280,6 +277,50 @@ void new_btn_list_batch(struct r_tk *tk, struct r_tk_tab *tab, int num, ...)
 		new_btn(tk, tab, name, 0, 0);
 	}
 	va_end(valist);
+}
+
+struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_btn *base)
+{
+	base->coTab = _new_tab(tk, base->name);
+	tab->curCoTab = base->coTab;
+	base->coTab->curCoTab = tab;
+	base->coTab->isCoTab = 1;
+	base->coTab->scrolling = 1;
+	base->coTab->isList = 1;
+	return base->coTab;
+}
+
+struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y, int num, ...)
+{
+	va_list valist;
+	va_start(valist, num);
+
+	struct r_tk_btn *oneof = new_btn(tk, tab, name, x, y);
+	oneof->type = BTN_TYPE_ONEOF;
+
+	struct r_tk_tab *cotab = new_cotab(tk, tab, oneof);
+
+	char *choice;
+	int maxX = 0;
+	struct r_tk_btn *tmp;
+
+	for(int i = 0; i < num; i++)
+	{
+		choice = va_arg(valist, char*);
+		tmp = new_btn(tk, cotab, choice, 0, 0);
+		tmp->type = BTN_TYPE_ONEOF_CHILD;
+
+		if(i == 0)
+			oneof->state.pointer = tmp;
+		maxX = fmax(tmp->rect.w, maxX);
+	}
+	va_end(valist);
+
+	cotab->offsetX = tk->width - (maxX + 5);
+	tab->curCoTab = 0;
+
+	tk->reDraw = 1;
+	return oneof;
 }
 
 struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **font, char* initTabName, void (*cb)(struct r_tk_btn *btn))
@@ -325,13 +366,13 @@ void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 	while(tmpBtn != 0)
 	{
 		if(tmpBtn == tab->curBtn)
-			if (tk->curTab->coTabAct == (tab == tk->curTab->coTab))
+			if (tk->curTab->coTabAct == (tab == tk->curTab->curCoTab))
 				SDL_SetTextureColorMod(tmpBtn->text, 255, 0, 0);
 			else
 				SDL_SetTextureColorMod(tmpBtn->text, 120, 0, 0);
 		else
 			SDL_SetTextureColorMod(tmpBtn->text, 255, 255, 255);
-		
+
 		if(tab->isList == 1)
 		{
 			tmpBtn->rect.x = 0 + tab->offsetX;
@@ -371,11 +412,11 @@ void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
 
 		toggleRect.w = btn->rect.h - margin*2;
 		toggleRect.h = btn->rect.h - margin*2;
-	
+
 		switch(btn->statePositioning)
 		{
 			case BTN_STATEPOS_LEFT:
-				// make a square with padding of 1px 
+				// make a square with padding of 1px
 				toggleRect.x = btn->rect.x + margin;
 				toggleRect.y = btn->rect.y + margin;
 				btn->rect.x += tk->fontsize + margin*2;
@@ -410,27 +451,41 @@ void draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
 	_draw_tab(tk, tab);
 
-	if(tab->coTab != 0)
+	if(tk->curTab->curBtn->type == BTN_TYPE_ONEOF)
 	{
-		tab->coTab->offsetX += tab->offsetX;
-		_draw_tab(tk, tab->coTab);
-		tab->coTab->offsetX -= tab->offsetX;
+		tab->curCoTab = tk->curTab->curBtn->coTab;
+		tab->curCoTab->offsetX += tab->offsetX;
+		_draw_tab(tk, tab->curCoTab);
+		tab->curCoTab->offsetX -= tab->offsetX;
 	}
+	else
+		tab->curCoTab = 0;
 }
 
 void r_tk_action(struct r_tk *tk)
 {
 	struct r_tk_btn *tmp = NULL;
 	if(tk->btn_cb == NULL) return;
-	if(tk->curTab->coTab != 0 && tk->curTab->coTabAct == 1)
-		tmp = tk->curTab->coTab->curBtn;
+	if(tk->curTab->curCoTab != 0 && tk->curTab->coTabAct == 1)
+		tmp = tk->curTab->curCoTab->curBtn;
 	else
 		tmp = tk->curTab->curBtn;
+
 	if(tmp->type == BTN_TYPE_TOGGLE)
 	{
 		tmp->state.integer = !tmp->state.integer;
 		tk->reDraw = 1;
 	}
+
+	if(tmp->type == BTN_TYPE_ONEOF)
+	{
+		r_tk_toggle_cotab(tk);
+		return;
+	}
+
+	if(tmp->type == BTN_TYPE_ONEOF_CHILD)
+		r_tk_toggle_cotab(tk);
+
 	if(tmp != NULL && tmp != 0)
 		tk->btn_cb(tmp);
 }
@@ -486,7 +541,7 @@ int r_tk_draw(struct r_tk *tk)
 		sem_post(&tk->draw_done_sem);
 		return 0;
 	}
-	
+
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
 
@@ -559,15 +614,15 @@ int r_tk_draw(struct r_tk *tk)
 				else
 					tk->curTab->offsetY += (tk->curTab->wantOffsetY - tk->curTab->offsetY)/2;
 		}
-		if(tk->curTab->coTab != 0 && tk->curTab->coTab->scrolling == 1)
+		if(tk->curTab->curCoTab != 0 && tk->curTab->curCoTab->scrolling == 1)
 		{
-			tk->curTab->coTab->wantOffsetY = tk->curTab->coTab->curBtn->rect.y - tk->fontsize - 1;
-			if(tk->curTab->coTab->wantOffsetY != tk->curTab->coTab->offsetY)
-				tk->curTab->coTab->offsetY += (tk->curTab->coTab->wantOffsetY - tk->curTab->coTab->offsetY)/2;
+			tk->curTab->curCoTab->wantOffsetY = tk->curTab->curCoTab->curBtn->rect.y - tk->fontsize - 1;
+			if(tk->curTab->curCoTab->wantOffsetY != tk->curTab->curCoTab->offsetY)
+				tk->curTab->curCoTab->offsetY += (tk->curTab->curCoTab->wantOffsetY - tk->curTab->curCoTab->offsetY)/2;
 		}
 		draw_tab(tk, tk->curTab);
 	}
-	
+
 	if(tk->oldTab != NULL)
 	{
 		if(tk->oldTab->wantOffsetX != tk->oldTab->offsetX)
@@ -581,10 +636,21 @@ int r_tk_draw(struct r_tk *tk)
 	}
 
 	if((tk->curTab->wantOffsetX == tk->curTab->offsetX) && (tk->curTab->wantOffsetY == tk->curTab->offsetY))
-		tk->reDraw = 0;
-	
+	{
+		if(tk->curTab->curCoTab)
+		{
+			if((tk->curTab->curCoTab->curCoTab->wantOffsetX == tk->curTab->curCoTab->offsetX))
+				if((tk->curTab->curCoTab->wantOffsetY == tk->curTab->curCoTab->offsetY))
+					tk->reDraw = 0;
+		}
+		else
+		{
+			tk->reDraw = 0;
+		}
+	}
+
 	//log_debug("want x = %d, x = %d, want y = %d, y = %d\n", tk->curTab->wantOffsetX, tk->curTab->offsetX, tk->curTab->wantOffsetY, tk->curTab->offsetY);
-	
+
 	SDL_RenderSetViewport(tk->renderer, &prevViewport);
 	SDL_RenderPresent(tk->renderer);
 

@@ -21,16 +21,14 @@ int main(void)
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);
 	new_btn(toolkit, toolkit->tabHead, "needs some", 3, 30);
 	new_btn(toolkit, toolkit->tabHead, "buttons", 60, 60);
-	new_toggle(toolkit, toolkit->tabHead, "i'm a toggle!", 0, 90, 0, BTN_STATEPOS_LEFT, 0);
-	new_toggle(toolkit, toolkit->tabHead, "my box is on the right!", 0, 120, 0, BTN_STATEPOS_RIGHT, 0);
-	new_toggle(toolkit, toolkit->tabHead, "and mines aligned", 0, 150, 0, BTN_STATEPOS_CUSTOM, 240);
-	new_toggle(toolkit, toolkit->tabHead, "with mine", 0, 180, 0, BTN_STATEPOS_CUSTOM, 240);
-	toolkit->tabHead->scrolling = 0;
 
-	new_cotab(toolkit, toolkit->tabHead, 300);
-	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, "this", "is", "a", "test");
-	toolkit->tabHead->coTab->isList = 1;
-	toolkit->tabHead->coTab->scrolling = 1;
+	new_oneof(toolkit, toolkit->tabHead, "oneof demo", 0, 90, 4, "one", "two", "three", "four");
+
+	new_toggle(toolkit, toolkit->tabHead, "i'm a toggle!", 0, 120, 0, BTN_STATEPOS_LEFT, 0);
+	new_toggle(toolkit, toolkit->tabHead, "my box is on the right!", 0, 150, 0, BTN_STATEPOS_RIGHT, 0);
+	new_toggle(toolkit, toolkit->tabHead, "and mines aligned", 0, 180, 0, BTN_STATEPOS_CUSTOM, 240);
+	new_toggle(toolkit, toolkit->tabHead, "with mine", 0, 1210, 0, BTN_STATEPOS_CUSTOM, 240);
+	toolkit->tabHead->scrolling = 0;
 
 	new_tab(toolkit, "two");
 	new_btn(toolkit, toolkit->tabHead, "dupa", 20, 0);
