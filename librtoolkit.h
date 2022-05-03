@@ -295,6 +295,11 @@ inline struct r_tk_btn * new_oneof_opt(struct r_tk *tk, struct r_tk_btn *parent,
 	struct r_tk_btn *tmp = new_btn(tk, parent->coTab, name, 0, 0);
 	tmp->type = BTN_TYPE_ONEOF_CHILD;
 	tmp->progData = (progdata == NULL) ? 0 : progdata;
+
+	int newOffsetX = tk->width - (tmp->rect.w + 5);
+	if(newOffsetX < parent->coTab->offsetX)
+		parent->coTab->offsetX = newOffsetX;
+
 	return tmp;
 }
 
@@ -307,9 +312,9 @@ struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, i
 	oneof->type = BTN_TYPE_ONEOF;
 
 	struct r_tk_tab *cotab = new_cotab(tk, tab, oneof);
+	cotab->offsetX = tk->width; // offscreen, until a button is added
 
 	char *choice;
-	int maxX = 0;
 	struct r_tk_btn *tmp;
 
 	oneof->state.pointer = 0;
@@ -321,11 +326,9 @@ struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, i
 
 		if(i == 0)
 			oneof->state.pointer = tmp;
-		maxX = fmax(tmp->rect.w, maxX);
 	}
 	va_end(valist);
 
-	cotab->offsetX = tk->width - (maxX + 5);
 	tab->curCoTab = 0;
 
 	tk->reDraw = 1;

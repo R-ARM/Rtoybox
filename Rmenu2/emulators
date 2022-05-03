@@ -1,21 +1,26 @@
 [GBA]
 command /usr/bin/mednafen
+mednafen_module gba
 ext gba
 
 [GB]
 command /usr/bin/mednafen
+mednafen_module gb
 ext gb
 
 [NES]
 command /usr/bin/mednafen
+mednafen_module nes
 ext nes
 
 [SNES]
 command /usr/bin/mednafen
+mednafen_module snes_faust
 ext smc
 
 [PS1]
 command /usr/bin/mednafen
+mednafen_module psx
 ext iso
 
 [PSP]
@@ -24,8 +29,10 @@ ext iso
 
 [Mega Drive]
 command /usr/bin/mednafen
+mednafen_module md
 ext md
 
 [Master System]
 command /usr/bin/mednafen
+mednafen_module sms
 ext sms

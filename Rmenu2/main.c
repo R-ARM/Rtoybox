@@ -62,9 +62,14 @@ void run_wait(char *path, char *arg1, char *arg2)
 	}
 }
 
-void writeMednafenConfigLine(char *key, char* value)
+void writeMednafenConfigLine(char* mod, char *opt, char* value)
 {
 	pid_t childPid;
+
+	// mednafen config changes need argument "-key" instead "key" itself
+	char *key = malloc(strlen(mod) + strlen(opt) + 2);
+	sprintf(key, "-%s.%s", mod, opt);
+
 	log_debug("Setting \"%s\" to \"%s\"\n", key, value);
 
 	childPid = fork();
@@ -79,26 +84,28 @@ void writeMednafenConfigLine(char *key, char* value)
 	}
 	else
 	{
-		// mednafen config changes need argument "-key" instead "key" itself
-		char *minusKey = malloc(strlen(key) + 1);
-		sprintf(minusKey, "-%s", key);
-		execl("/usr/games/mednafen", "mednafen", minusKey, value, NULL);
+		execl("/usr/games/mednafen", "mednafen", key, value, NULL);
 		log_err("Error changing mednafen config: %s\n", strerror(errno));
 		exit(1);
 	}
 }
 
-inline void writeMednafenConfigLineInt(char *key, int value)
+inline void writeMednafenConfigLineInt(char *mod, char *opt, int value)
 {
 	char buf[65];
 	sprintf(buf, "%d", value);
-	writeMednafenConfigLine(key, buf);
+
+	writeMednafenConfigLine(mod, opt, buf);
 }
 
 void buttonStateCallback(struct r_tk_btn *btn)
 {
 	struct btnData *tmp;
-	if(strncmp(btn->name, "Power Off", 5) == 0)
+	if(btn->type == BTN_TYPE_ONEOF_CHILD)
+	{
+		writeMednafenConfigLine((char *)toolkit->curTab->progData, (char *)toolkit->curTab->curCoTab->progData, (char *)btn->progData);
+	}
+	else if(strncmp(btn->name, "Power Off", 5) == 0)
 	{
 		log_debug("Powering Off!");
 #ifdef ROS
@@ -106,11 +113,6 @@ void buttonStateCallback(struct r_tk_btn *btn)
 #else
 		exit(0);
 #endif
-	}
-	else if(strcmp(btn->name, "Scanlines") == 0)
-	{
-		log_debug("Setting nes scanlines to %d\n", btn->state.integer);
-		writeMednafenConfigLineInt("nes.scanlines", btn->state.integer);
 	}
 	else if(btn->progData != NULL)
 	{
@@ -168,6 +170,7 @@ struct emulator {
 	char* cmd;
 	char* system;
 	char* args;
+	char* mednafen_module;
 };
 
 void* loadRomList(void *arg);
@@ -178,6 +181,7 @@ int loadEmulators(struct r_tk *tk)
 	char args[256] = "";
 	char ext[256] = "";
 	char tmp[256] = "";
+	char med_mod[256] = "";
 	struct emulator *emu_tmp;
 
 	log_debug("Loading emulator config file\n");
@@ -200,19 +204,21 @@ int loadEmulators(struct r_tk *tk)
 
 		if(strncmp("[", tmp, 1) == 0)
 		{
-			log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\"\n", cmd, system, ext, args);
+			log_debug("Got config entry: command \"%s\", system \"%s\", ext \"%s\", args \"%s\", mednafen module \"%s\"\n", cmd, system, ext, args, med_mod);
 			emu_tmp = malloc(sizeof(struct emulator));
 			emu_tmp->tk = tk;
 			emu_tmp->ext = ext;
 			emu_tmp->cmd = cmd;
 			emu_tmp->system = system;
 			emu_tmp->args = args;
+			emu_tmp->mednafen_module = med_mod;
 			loadRomList(emu_tmp);
 			strncpy(system, &tmp[1], 255-2);
 
 			strcpy(cmd, "");	// don't carry over old values
 			strcpy(args, "");
 			strcpy(ext, "");
+			strcpy(med_mod, "");
 		}
 		else if(strncmp("command", tmp, 7) == 0)
 			strncpy(cmd, &tmp[8], 255-7);
@@ -220,6 +226,8 @@ int loadEmulators(struct r_tk *tk)
 			strncpy(ext, &tmp[4], 255-3);
 		else if(strncmp("args", tmp, 4) == 0)
 			strncpy(args, &tmp[5], 255-4);
+		else if(strncmp("mednafen_module", tmp, 15) == 0)
+			strncpy(med_mod, &tmp[16], 255-15);
 		else if(strlen(tmp) != 0)	// ignore empty lines
 			log_err("Malformed option \"%s\"\n", tmp);
 	}
@@ -253,8 +261,19 @@ void* loadRomList(void *arg)
 			{
 				if(i == 0)
 				{
-					new_tab(input->tk, input->system);
-					new_toggle(input->tk, input->tk->tabHead, "Scanlines", 0, 0, 0, BTN_STATEPOS_RIGHT, 0);
+					struct r_tk_tab *tab = new_tab(input->tk, input->system);
+					tab->progData = malloc(strlen(input->mednafen_module) + 1);
+					strcpy(tab->progData, input->mednafen_module);
+
+					if(input->mednafen_module != 0 && strlen(input->mednafen_module) > 0)
+					{
+						struct r_tk_btn *oneof = new_oneof(input->tk, input->tk->tabHead, "Stretching options", 0, 0, 0);
+						new_oneof_opt(input->tk, oneof, "Fullscreen", "full");
+						new_oneof_opt(input->tk, oneof, "Keep aspect ratio", "aspect");
+						new_oneof_opt(input->tk, oneof, "Integer scaling", "aspect_int");
+
+						oneof->coTab->progData = (char *)"stretch";
+					}
 				}
 				strncpy(fancyName, ent->d_name, strcspn(ent->d_name, "."));
 				new_btn(input->tk, input->tk->tabHead, fancyName, 0, 0);
@@ -278,7 +297,7 @@ void* loadRomList(void *arg)
 	}
 	else
 		log_warn("Failed opening \"%s\" directory\n", romdir);
-	log_debug("Found \"%d\" roms for \"%s\" in \"%s\"\n", i, input->system, romdir);
+	log_debug("Found \"%d\" roms for \"%s\" in \"%s\" using mednafen module \"%s\"\n", i, input->system, romdir, input->mednafen_module);
 	free(input);
 }
 
