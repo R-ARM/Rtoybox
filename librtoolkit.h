@@ -290,6 +290,14 @@ struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_b
 	return base->coTab;
 }
 
+inline struct r_tk_btn * new_oneof_opt(struct r_tk *tk, struct r_tk_btn *parent, char *name, void *progdata)
+{
+	struct r_tk_btn *tmp = new_btn(tk, parent->cotab, name, 0, 0);
+	tmp->type = BTN_TYPE_ONEOF_CHILD;
+	tmp->progdata = (progdata == NULL) ? 0 : progdata;
+	return tmp;
+}
+
 struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, int x, int y, int num, ...)
 {
 	va_list valist;
@@ -307,8 +315,7 @@ struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, i
 	for(int i = 0; i < num; i++)
 	{
 		choice = va_arg(valist, char*);
-		tmp = new_btn(tk, cotab, choice, 0, 0);
-		tmp->type = BTN_TYPE_ONEOF_CHILD;
+		tmp = new_oneof_opt(tk, oneof, choice, 0);
 
 		if(i == 0)
 			oneof->state.pointer = tmp;
