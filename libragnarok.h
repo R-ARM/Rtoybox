@@ -256,7 +256,7 @@ int r_init(SDL_Renderer **renderer, SDL_Window **window, TTF_Font **font, uint64
 			tmp = 90;
 		}
 		log_debug("Display DPI at: %f\n", tmp);
-		fontsize = (int)tmp/4;
+		fontsize = ((int)tmp)/10;
 
 		*font = TTF_OpenFont("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", fontsize);
 		if (*font == NULL)
