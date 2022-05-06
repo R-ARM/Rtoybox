@@ -15,7 +15,7 @@ void buttonStateCallback(struct r_tk_btn *btn)
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff, 26);
+	r_init(&renderer, &window, &font, 0xff);
 	toolkit = new_r_tk(&window, &renderer, &font, "Test", buttonStateCallback);
 
 	new_btn(toolkit, toolkit->tabHead, "this tab", 0, 0);

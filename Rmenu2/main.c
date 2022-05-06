@@ -299,7 +299,7 @@ void* loadRomList(void *arg)
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff, 26);
+	r_init(&renderer, &window, &font, 0xff);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
 
 	r_attach_input_callback(_r_tk_input_handler);

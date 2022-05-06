@@ -67,7 +67,7 @@ int r_log(int prio, const char *format, ...)
 	return 0;
 }
 
-int _fontsize = 0;
+float _fontsize = 0;
 int (*_cb_input_handle)(int, int, int);
 int _is_inp_hand_attach = 0;
 int _r_reopen_joydev = 0;
@@ -211,7 +211,7 @@ end:
 	log_debug("Rdevkit not found, handler quitting\n");
 }
 
-int r_init(SDL_Renderer **renderer, SDL_Window **window, TTF_Font **font, uint64_t flags, uint8_t fontsize)
+int r_init(SDL_Renderer **renderer, SDL_Window **window, TTF_Font **font, uint64_t flags)
 {
 
 	log_debug("Spawning Rdevkit handler thread\n");
@@ -247,6 +247,16 @@ int r_init(SDL_Renderer **renderer, SDL_Window **window, TTF_Font **font, uint64
 			log_err("Error initializng TTF:\n%s\n", SDL_GetError());
 			exit(1);
 		}
+
+		float tmp = 0;
+		int fontsize = 26;
+		if (SDL_GetDisplayDPI(0, NULL, NULL, &tmp) < 0)
+		{
+			log_err("Error getting display DPI, using defaults:\n%s\n", SDL_GetError());
+			tmp = 90;
+		}
+		log_debug("Display DPI at: %f\n", tmp);
+		fontsize = (int)tmp/4;
 
 		*font = TTF_OpenFont("/usr/share/fonts/liberation/LiberationSans-Regular.ttf", fontsize);
 		if (*font == NULL)

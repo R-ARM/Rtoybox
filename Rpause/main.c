@@ -111,7 +111,7 @@ int getBatPercent()
 
 int main(void)
 {
-	r_init(&renderer, &window, &font, 0xff, 24);
+	r_init(&renderer, &window, &font, 0xff);
 	toolkit = new_r_tk(&window, &renderer, &font, "System", buttonStateCallback);
 	r_attach_input_callback(handle_input);
 	new_btn_list_batch(toolkit, toolkit->tabHead, 5, "Resume", "Toggle FPS View", "Volume", "Brightness", "Battery");
