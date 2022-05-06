@@ -290,7 +290,7 @@ struct r_tk_tab * new_cotab(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_b
 	return base->coTab;
 }
 
-inline struct r_tk_btn * new_oneof_opt(struct r_tk *tk, struct r_tk_btn *parent, char *name, void *progdata)
+struct r_tk_btn * new_oneof_opt(struct r_tk *tk, struct r_tk_btn *parent, char *name, void *progdata)
 {
 	struct r_tk_btn *tmp = new_btn(tk, parent->coTab, name, 0, 0);
 	tmp->type = BTN_TYPE_ONEOF_CHILD;
