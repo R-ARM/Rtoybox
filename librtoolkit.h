@@ -504,7 +504,7 @@ void r_tk_action(struct r_tk *tk)
 
 int _r_tk_input_handler(int type, int code, int value)
 {
-	if(value != 1) goto out;
+	if(value == 0) return 0;
 	struct r_tk *toolkit = _r_glob_toolkit; // :( ugly
 
 	sem_wait(&toolkit->draw_done_sem);
