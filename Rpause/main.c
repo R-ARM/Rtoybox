@@ -126,10 +126,10 @@ int main(void)
 	snprintf(brBuffer, 4, "%d%%", getBrightness());
 	snprintf(batBuffer, 4, "%d%%", getBatPercent());
 
-	new_cotab(toolkit, toolkit->tabHead, 200);
-	new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, " ", " ", volBuffer, brBuffer, batBuffer);
-	toolkit->tabHead->coTab->isList = 1;
-	toolkit->tabHead->coTab->scrolling = 0;
+	//new_cotab(toolkit, toolkit->tabHead, 200);
+	//new_btn_list_batch(toolkit, toolkit->tabHead->coTab, 4, " ", " ", volBuffer, brBuffer, batBuffer);
+	//toolkit->tabHead->coTab->isList = 1;
+	//toolkit->tabHead->coTab->scrolling = 0;
 	
 	pid = readIntFrom("/tmp/curpid");
 	kill(pid, 19); // SIGSTOP
