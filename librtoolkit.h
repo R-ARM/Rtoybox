@@ -536,7 +536,7 @@ int _r_tk_input_handler(int type, int code, int value)
 	toolkit->reDraw = 1;
 	return 0;
 
-	out:
+	//out:
 	//return _r_tk_prog_input(type, code, value); // maybe in future?
 }
 
