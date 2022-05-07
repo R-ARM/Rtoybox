@@ -154,7 +154,7 @@ void _r_upd_joystick(void)
 				{
 					if (_is_inp_hand_attach == 1)
 					{
-						_cb_input_handle(ev->type, ev->code, ev->value);
+						_cb_input_handle(ev[i].type, ev[i].code, ev[i].value);
 					}
 					else
 					{
