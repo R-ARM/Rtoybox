@@ -1,0 +1,10 @@
+#!/bin/bash
+EMMC="$(ls /dev/mmcblk* | grep -F boot0 | sed 's/boot0//')"
+BOOTDEV="$(mount | sed -n 's#\(/dev/mmcblk.\)p. on / type.*#\1#p')"
+SD_EXT="$(ls /dev/mmcblk? | grep -v $BOOTDEV | grep -v $EMMC | head -n1)"
+
+parted -s "$SD_EXT" mklabel gpt
+parted -s "$SD_EXT" mkpart RDATA ext4 "16MiB" "100%"
+DATAPART="$SD_EXT"p1
+
+echo $DATAPART > /tmp/datapart

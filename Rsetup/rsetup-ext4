@@ -1,0 +1,2 @@
+#!/bin/bash
+mkfs.ext4 "$(cat /tmp/datapart)"
