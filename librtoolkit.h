@@ -90,6 +90,7 @@ struct r_tk
 	SDL_Renderer **renderer;
 	TTF_Font **font;
 
+	int inputTabSwitching;
 	void (*btn_cb)(struct r_tk_btn*);
 
 	int width;
@@ -345,6 +346,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->font = font;
 	tmp->btn_cb = cb;
 	tmp->reDraw = 1;
+	tmp->inputTabSwitching = 1;
 
 	struct r_tk_tab *initialTab;
 	initialTab = calloc(1, sizeof(struct r_tk_tab));
@@ -526,10 +528,12 @@ int _r_tk_input_handler(int type, int code, int value)
 			r_tk_action(toolkit);
 			break;
 		case BTN_TR:
-			r_tk_next_tab(toolkit);
+			if(toolkit->inputTabSwitching == 1)
+				r_tk_next_tab(toolkit);
 			break;
 		case BTN_TL:
-			r_tk_prev_tab(toolkit);
+			if(toolkit->inputTabSwitching == 1)
+				r_tk_prev_tab(toolkit);
 			break;
 	}
 
