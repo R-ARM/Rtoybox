@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 EMMC="$(ls /dev/mmcblk* | grep -F boot0 | sed 's/boot0//')"
-BOOTDEV="$(mount | sed -n 's#\(/dev/mmcblk.\)p. on / type.*#\1#p')"
+BOOTDEV="$(readlink -f /dev/disk/by-partlabel/RROOT | grep -oE '/dev/mmcblk.')"
 SD_EXT="$(ls /dev/mmcblk? | grep -v $BOOTDEV | grep -v $EMMC | head -n1)"
 
 PART_BEGIN="$(parted -s $BOOTDEV print free | grep 'Free Space' | tail -n1 | awk '{print $1}')"
