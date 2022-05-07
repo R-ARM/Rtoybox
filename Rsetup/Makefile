@@ -1,4 +1,5 @@
 PKG_CONFIG ?= pkg-config
+CC ?= gcc
 
 default:
-	gcc main.c -o rsetup -O3 -g -lm `$(PKG_CONFIG) --cflags sdl2` `$(PKG_CONFIG) --libs sdl2` `$(PKG_CONFIG) --libs SDL2_ttf` `$(PKG_CONFIG) --cflags SDL2_ttf` -lpthread -Wall -Wextra -Wpedantic $(CFLAGS)
+	$(CROSS_COMPILE)$(CC) main.c -o rsetup -O3 -g -lm `$(PKG_CONFIG) --cflags sdl2` `$(PKG_CONFIG) --libs sdl2` `$(PKG_CONFIG) --libs SDL2_ttf` `$(PKG_CONFIG) --cflags SDL2_ttf` -lpthread -Wall -Wextra -Wpedantic $(CFLAGS)
