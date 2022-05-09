@@ -236,9 +236,9 @@ void* loadRomList(void *arg)
 	char romdir[256] = "";
 	char fancyName[256] = "";
 #ifdef ROS
-	strcpy(romdir, "/data/roms/");
+	strcpy(romdir, "/data/Roms/");
 #else
-	strcpy(romdir, "./roms/");
+	strcpy(romdir, "./Roms/");
 #endif
 	strcat(romdir, input->system);
 	strcat(romdir, "/");
