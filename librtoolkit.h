@@ -95,7 +95,6 @@ struct r_tk
 
 	int width;
 	int height;
-	int reDraw;
 
 	int tabOffsetX;
 	int tabWantOffsetX;
@@ -104,6 +103,7 @@ struct r_tk
 	int fontsize;
 
 	sem_t draw_done_sem;
+	sem_t draw_start_sem;
 
 	struct r_tk_tab *oldTab;
 	struct r_tk_tab *curTab;
@@ -127,7 +127,7 @@ void r_tk_next_tab(struct r_tk *tk)
 		tk->curTab->offsetX = tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 }
 
 void r_tk_prev_tab(struct r_tk *tk)
@@ -143,14 +143,14 @@ void r_tk_prev_tab(struct r_tk *tk)
 		tk->curTab->offsetX = -1 * tk->width;
 		tk->curTab->wantOffsetX = 0;
 	}
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 }
 
 void r_tk_toggle_cotab(struct r_tk *tk)
 {
 	if(tk->curTab->curCoTab != 0)
 		tk->curTab->coTabAct = !tk->curTab->coTabAct;
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 }
 
 void r_tk_next_btn(struct r_tk *tk)
@@ -165,7 +165,7 @@ void r_tk_next_btn(struct r_tk *tk)
 		if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->prev)
 			tk->curTab->curBtn = tk->curTab->curBtn->prev;
 	}
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 }
 
 void r_tk_prev_btn(struct r_tk *tk)
@@ -180,7 +180,7 @@ void r_tk_prev_btn(struct r_tk *tk)
 		if(tk->curTab->hasButtons == 1 && tk->curTab->curBtn->next)
 			tk->curTab->curBtn = tk->curTab->curBtn->next;
 	}
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 }
 
 struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
@@ -196,7 +196,7 @@ struct r_tk_tab * _new_tab(struct r_tk *tk, char *name)
 
 	tmp->scrolling = 1;
 
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 	return tmp;
 }
 
@@ -215,6 +215,7 @@ struct r_tk_tab* new_tab(struct r_tk *tk, char *name)
 	tk->tabHead->prev = tk->tabTail;
 	tk->tabTail->next = tk->tabHead;
 
+	sem_post(&tk->draw_start_sem);
 	return tmp;
 }
 
@@ -247,7 +248,7 @@ struct r_tk_btn * new_btn(struct r_tk *tk, struct r_tk_tab *tab, char *name, int
 
 	tab->hasButtons = 1;
 
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 	return tmp;
 }
 
@@ -332,7 +333,7 @@ struct r_tk_btn * new_oneof(struct r_tk *tk, struct r_tk_tab *tab, char *name, i
 
 	tab->curCoTab = 0;
 
-	tk->reDraw = 1;
+	sem_post(&tk->draw_start_sem);
 	return oneof;
 }
 
@@ -345,7 +346,6 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->renderer = *renderer;
 	tmp->font = font;
 	tmp->btn_cb = cb;
-	tmp->reDraw = 1;
 	tmp->inputTabSwitching = 1;
 
 	struct r_tk_tab *initialTab;
@@ -367,6 +367,8 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	SDL_GetWindowSize(*window, &tmp->width, &tmp->height);
 
 	sem_init(&tmp->draw_done_sem, 0, 1);
+	sem_init(&tmp->draw_start_sem, 0, 1);
+	sem_post(&tmp->draw_start_sem);
 
 	_r_glob_toolkit = tmp;
 	return tmp;
@@ -488,7 +490,7 @@ void r_tk_action(struct r_tk *tk)
 	if(tmp->type == BTN_TYPE_TOGGLE)
 	{
 		tmp->state.integer = !tmp->state.integer;
-		tk->reDraw = 1;
+		sem_post(&tk->draw_start_sem);
 	}
 
 	if(tmp->type == BTN_TYPE_ONEOF)
@@ -537,7 +539,7 @@ int _r_tk_input_handler(int type, int code, int value)
 			break;
 	}
 
-	toolkit->reDraw = 1;
+	sem_post(&toolkit->draw_start_sem);
 	return 0;
 
 	//out:
@@ -552,11 +554,7 @@ int r_tk_draw(struct r_tk *tk)
 
 
 	//log_debug("Need to redraw? %d\n", tk->reDraw);
-	if(tk->reDraw == 0)
-	{
-		sem_post(&tk->draw_done_sem);
-		return 0;
-	}
+	sem_wait(&tk->draw_start_sem);
 
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
@@ -654,16 +652,16 @@ int r_tk_draw(struct r_tk *tk)
 			tk->oldTab = NULL;
 	}
 
-	if((tk->curTab->wantOffsetX == tk->curTab->offsetX) && (tk->curTab->wantOffsetY == tk->curTab->offsetY))
+	if((tk->curTab->wantOffsetX != tk->curTab->offsetX) || (tk->curTab->wantOffsetY != tk->curTab->offsetY))
 	{
 		if(tk->curTab->curCoTab)
 		{
-			if((tk->curTab->curCoTab->wantOffsetY == tk->curTab->curCoTab->offsetY))
-				tk->reDraw = 0;
+			if((tk->curTab->curCoTab->wantOffsetY != tk->curTab->curCoTab->offsetY))
+				sem_post(&tk->draw_start_sem);
 		}
 		else
 		{
-			tk->reDraw = 0;
+			sem_post(&tk->draw_start_sem);
 		}
 	}
 
