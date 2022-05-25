@@ -134,6 +134,7 @@ void _r_upd_joystick(void)
 {
 	int rd, joyfd, i;
 	int *hint = malloc(sizeof(int));
+	*hint = -1;
 	struct input_event ev[8];
 
 	char dev[20];
@@ -167,6 +168,7 @@ void _r_upd_joystick(void)
 		joyfd = _r_find_rinputer(hint);
 		_r_reopen_joydev = 0;
 	}
+	free(hint);
 }
 
 void _r_devkit_handler(void)
