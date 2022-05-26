@@ -374,6 +374,45 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	return tmp;
 }
 
+void destroy_btn(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_btn *button)
+{
+	if(button->coTab)
+		return; ///XXX
+
+	// if we're head or tail handle that too
+	if(tab->btnHead == button && tab->btnTail == button)
+	{
+		tab->btnHead = 0;
+		tab->btnTail = 0;
+		tab->hasButtons = 0;
+	}
+	else if(tab->btnHead == button)
+		tab->btnHead = tab->btnHead->next;
+	else if(tab->btnTail == button)
+		tab->btnTail = tab->btnTail->prev;
+
+	if(button->prev)
+		button->prev->next = button->next ? button->next : 0;
+	if(button->next)
+		button->next->prev = button->prev ? button->prev : 0;
+
+	if(tab->curBtn == button)
+	{
+		if(tab->curBtn->prev == button)
+			tab->curBtn = 0;
+		else
+			if(tab->curBtn->prev)
+				tab->curBtn = tab->curBtn->prev;
+			else if(tab->curBtn->next)
+				tab->curBtn = tab->curBtn->next;
+			else
+				tab->curBtn = 0;
+	}
+
+	SDL_DestroyTexture(button->text);
+	free(button);
+}
+
 void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
 	struct r_tk_btn *tmpBtn = tab->btnHead;
