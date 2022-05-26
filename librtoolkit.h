@@ -413,6 +413,44 @@ void destroy_btn(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_btn *button)
 	free(button);
 }
 
+void destroy_tab(struct r_tk *tk, struct r_tk_tab *tab)
+{
+	if(tk->tabHead == tab && tk->tabTail == tab)
+	{
+		// TODO
+		log_err("Can't remove last tab\n");
+		return;
+	}
+	else if(tk->tabHead == tab)
+		tk->tabHead = tk->tabHead->next;
+	else if(tk->tabTail == tab)
+		tk->tabTail = tk->tabTail->prev;
+
+	tk->tabHead->prev = tk->tabTail;
+	tk->tabTail->next = tk->tabHead;
+
+	if(tab->prev)
+		tab->prev->next = tab->next;
+	if(tab->next)
+		tab->next->prev = tab->prev;
+
+	if(tk->curTab == tab)
+	{
+		if(tk->curTab->prev)
+			tk->curTab = tk->curTab->prev;
+		else if(tk->curTab->next)
+			tk->curTab = tk->curTab->next;
+		else
+			log_err("No tab found to switch to after removal of current one\n");
+	}
+
+	while(tab->btnHead)
+		destroy_btn(tk, tab, tab->btnHead);
+
+	SDL_DestroyTexture(tab->text);
+	free(tab);
+}
+
 void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
 	struct r_tk_btn *tmpBtn = tab->btnHead;
