@@ -142,7 +142,10 @@ void _r_upd_joystick(void)
 
 	joyfd = _r_find_rinputer(hint);
 	if(joyfd < 0)
+	{
+		free(hint);
 		return;
+	}
 	while (1)
 	{
 
