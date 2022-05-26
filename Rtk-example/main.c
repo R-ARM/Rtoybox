@@ -67,6 +67,7 @@ int main(void)
 			switch(event.type)
 			{
 				case SDL_QUIT:
+					destroy_toolkit(toolkit);
 					exit(0);
 					break;
 				case SDL_KEYDOWN:

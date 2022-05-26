@@ -377,7 +377,13 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 void destroy_btn(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_btn *button)
 {
 	if(button->coTab)
-		return; ///XXX
+	{
+		while(button->coTab->btnHead)
+			destroy_btn(tk, button->coTab, button->coTab->btnHead);
+
+		SDL_DestroyTexture(button->text);
+		free(button->coTab);
+	}
 
 	// if we're head or tail handle that too
 	if(tab->btnHead == button && tab->btnTail == button)
@@ -385,16 +391,19 @@ void destroy_btn(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_btn *button)
 		tab->btnHead = 0;
 		tab->btnTail = 0;
 		tab->hasButtons = 0;
-	}
-	else if(tab->btnHead == button)
+	} else if(tab->btnHead == button)
 		tab->btnHead = tab->btnHead->next;
 	else if(tab->btnTail == button)
 		tab->btnTail = tab->btnTail->prev;
 
-	if(button->prev)
-		button->prev->next = button->next ? button->next : 0;
-	if(button->next)
-		button->next->prev = button->prev ? button->prev : 0;
+	if(button->prev && button->next)
+	{
+		button->prev->next = button->next;
+		button->next->prev = button->prev;
+	} else if(button->next)
+		button->next->prev = 0;
+	else if(button->prev)
+		button->prev->next = 0;
 
 	if(tab->curBtn == button)
 	{
@@ -417,8 +426,8 @@ void destroy_tab(struct r_tk *tk, struct r_tk_tab *tab)
 {
 	if(tk->tabHead == tab && tk->tabTail == tab)
 	{
-		// TODO
-		log_err("Can't remove last tab\n");
+		// TODO?
+		log_warn("Can't remove last tab\n");
 		return;
 	}
 	else if(tk->tabHead == tab)
@@ -449,6 +458,23 @@ void destroy_tab(struct r_tk *tk, struct r_tk_tab *tab)
 
 	SDL_DestroyTexture(tab->text);
 	free(tab);
+}
+
+void destroy_toolkit(struct r_tk *tk)
+{
+	while(tk->tabHead != tk->tabTail)
+	{
+		if(tk->tabHead->progData)
+			free(tk->tabHead->progData);
+		destroy_tab(tk, tk->tabHead);
+	}
+	// last tab
+	while(tk->tabHead->btnHead)
+		destroy_btn(tk, tk->tabHead, tk->tabHead->btnHead);
+
+	SDL_DestroyRenderer(tk->renderer);
+	SDL_DestroyWindow(tk->window);
+	free(tk);
 }
 
 void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
