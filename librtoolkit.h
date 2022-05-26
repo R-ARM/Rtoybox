@@ -9,7 +9,7 @@ void get_text_and_rect(SDL_Renderer *renderer, char *text,
 	SDL_Surface *surface;
 	SDL_Color textColor = {r, g, b, 0};
 
-	surface = TTF_RenderText_Solid(font, text, textColor);
+	surface = TTF_RenderUTF8_Blended(font, text, textColor);
 	*texture = SDL_CreateTextureFromSurface(renderer, surface);
 	text_width = surface->w;
 	text_height = surface->h;
