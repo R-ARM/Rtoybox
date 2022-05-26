@@ -381,7 +381,7 @@ void destroy_btn(struct r_tk *tk, struct r_tk_tab *tab, struct r_tk_btn *button)
 		while(button->coTab->btnHead)
 			destroy_btn(tk, button->coTab, button->coTab->btnHead);
 
-		SDL_DestroyTexture(button->text);
+		SDL_DestroyTexture(button->coTab->text);
 		free(button->coTab);
 	}
 
@@ -475,6 +475,8 @@ void destroy_toolkit(struct r_tk *tk)
 	SDL_DestroyRenderer(tk->renderer);
 	SDL_DestroyWindow(tk->window);
 	free(tk);
+
+	SDL_Quit();
 }
 
 void _draw_tab(struct r_tk *tk, struct r_tk_tab *tab)
