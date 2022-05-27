@@ -548,7 +548,7 @@ void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
 				toggleRect.y = btn->rect.y + margin;
 				break;
 			case BTN_STATEPOS_CUSTOM:
-				toggleRect.x = btn->forceStateX;
+				toggleRect.x = btn->rect.x + btn->forceStateX;
 				toggleRect.y = btn->rect.y + margin;
 				break;
 		}
