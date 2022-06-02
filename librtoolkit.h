@@ -628,7 +628,14 @@ int _r_tk_input_handler(int type, int code, int value)
 			break;
 		case BTN_DPAD_LEFT:
 		case BTN_DPAD_RIGHT:
+		case ABS_HAT0X:
 			r_tk_toggle_cotab(toolkit);
+			break;
+		case ABS_HAT0Y:
+			if(value == 1) // 1 = down, -1 = up
+				r_tk_prev_btn(toolkit);
+			else if(value == -1)
+				r_tk_next_btn(toolkit);
 			break;
 		case BTN_EAST:
 		case BTN_SOUTH:
