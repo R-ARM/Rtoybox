@@ -93,6 +93,8 @@ struct r_tk
 	int inputTabSwitching;
 	void (*btn_cb)(struct r_tk_btn*);
 
+	uint8_t opacity;
+
 	int width;
 	int height;
 
@@ -347,6 +349,7 @@ struct r_tk * new_r_tk(SDL_Window **window, SDL_Renderer **renderer, TTF_Font **
 	tmp->font = font;
 	tmp->btn_cb = cb;
 	tmp->inputTabSwitching = 1;
+	tmp->opacity = 255;
 
 	struct r_tk_tab *initialTab;
 	initialTab = calloc(1, sizeof(struct r_tk_tab));
@@ -553,7 +556,7 @@ void draw_btn(struct r_tk *tk, struct r_tk_btn *btn)
 				break;
 		}
 
-		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255); // TODO: coloring
+		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, tk->opacity); // TODO: coloring
 
 		if(btn->state.integer == 1)
 			SDL_RenderFillRect(tk->renderer, &toggleRect);
@@ -671,7 +674,7 @@ int r_tk_draw(struct r_tk *tk)
 	SDL_Rect prevViewport;
 	SDL_RenderGetViewport(tk->renderer, &prevViewport);
 
-	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, tk->opacity);
 	SDL_RenderClear(tk->renderer);
 	int i = 0;
 	if(tk->tabTail != tk->tabHead)
@@ -721,7 +724,7 @@ int r_tk_draw(struct r_tk *tk)
 		// line separating tabs and other widgets
 		SDL_SetRenderDrawColor(tk->renderer, 255, 255, 255, 255);
 		SDL_RenderDrawLine(tk->renderer, 0, 0, tk->width, 0);
-		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(tk->renderer, 0, 0, 0, tk->opacity);
 	}
 	// draw buttons
 	if(tk->curTab->wantOffsetX != tk->curTab->offsetX)
